@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Cuity.UI.Components;
@@ -7,19 +8,18 @@ namespace Cuity.UI.Components;
 /// <summary>
 /// Represent a component, which can hold a <typeparamref name="T"/> instance.
 /// </summary>
-/// <typeparam name="T"></typeparam>
-public class ChildComponent<T>: IComponent where T: CuityObject {
+/// <typeparam name="T">A <see cref="CuityEntity"/> as child.</typeparam>
+public class Child<T>: IComponent where T: CuityEntity {
     private const string NAME_OF = "ChildContainer";
-
     private T m_child = null!;
-    private bool m_isUnique = false;
 
+    /// <summary>
+    /// Name of the component.
+    /// </summary>
     public string Name { get => NAME_OF; }
-
-    public bool IsUnique { get => m_isUnique; }
 
     /// <summary>
     /// Attached child object as <typeparamref name="T"/>.
     /// </summary>
-    public T Child { get => m_child; set => m_child = value; }
+    public T Attached { get => m_child; set => m_child = value; }
 }

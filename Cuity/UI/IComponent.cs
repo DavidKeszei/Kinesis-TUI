@@ -13,9 +13,4 @@ public interface IComponent {
     /// Name of the component.
     /// </summary>
     public string Name { get; }
-
-    /// <summary>
-    /// Indicates the component is unique in the <see cref="CuityObject"/>.
-    /// </summary>
-    public bool IsUnique { get; }
 }

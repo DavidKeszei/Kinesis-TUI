@@ -11,8 +11,13 @@ namespace Cuity.Rendering;
 public interface IRenderable: IComponent {
 
     /// <summary>
+    /// Indicates the <see cref="IRenderable"/> component is "dirty".
+    /// </summary>
+    public bool IsDirty { get; internal set; }
+
+    /// <summary>
     /// Render the object to the screen.
     /// </summary>
     /// <param name="buffer">Back-buffer of the renderer.</param>
-    public void Render(in ConsoleBuffer buffer);
+    public void Render(in Canvas buffer);
 }

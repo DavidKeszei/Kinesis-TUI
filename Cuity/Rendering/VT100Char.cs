@@ -29,7 +29,11 @@ public struct VT100Char: IEquatable<VT100Char> {
         m_rgb = color;
     }
 
-    public readonly bool Equals(VT100Char vt) => vt.m_character == m_character && vt.Color.Equals(m_rgb);
+    public readonly bool Equals(VT100Char vt) 
+        => vt.m_character == m_character && vt.Color.Equals(m_rgb);
+
+    public string ToVT100Str()
+        => $"\x1b[48;2;{m_rgb.R};{m_rgb.G};{m_rgb.B}m{m_character}";
 }
 
 /// <summary>
