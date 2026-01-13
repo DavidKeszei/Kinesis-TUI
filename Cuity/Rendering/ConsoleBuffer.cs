@@ -12,12 +12,12 @@ internal readonly struct ConsoleBuffer {
     private readonly (int X, int Y) m_dimension = (-1, -1);
 
     /// <summary>
-    /// Dimension of the buffer.
+    /// Dimension of the from.
     /// </summary>
     public (int X, int Y) Dimension { get => m_dimension; }
 
     /// <summary>
-    /// Get a <see cref="vt_char"/> reference from the buffer.
+    /// Get a <see cref="vt_char"/> reference from the from.
     /// </summary>
     /// <param name="x">X position of the reference.</param>
     /// <param name="y">Y position of the reference.</param>
@@ -27,21 +27,21 @@ internal readonly struct ConsoleBuffer {
     /// <summary>
     /// Create new <see cref="ConsoleBuffer"/> with specific dimension.
     /// </summary>
-    /// <param name="x">Width of the buffer.</param>
-    /// <param name="y">Height of the buffer.</param>
+    /// <param name="x">Width of the from.</param>
+    /// <param name="y">Height of the from.</param>
     public ConsoleBuffer(int x, int y) {
         m_dimension = (x, y);
         m_buffer = new vt_char[x, y];
     }
 
     /// <summary>
-    /// Copy <paramref name="buffer"/> to this buffer.
+    /// Copy <paramref name="from"/> to this from.
     /// </summary>
-    /// <param name="buffer">Source buffer.</param>
-    public void Copy(in ConsoleBuffer buffer) {
+    /// <param name="from">Source from.</param>
+    public void Copy(in ConsoleBuffer from) {
         for (int x = 0; x < m_dimension.X; ++x) {
             for (int y = 0; y < m_dimension.Y; ++y) {
-                this[x, y] = buffer[x, y];
+                this[x, y] = from[x, y];
             }
         }
     }
@@ -49,9 +49,9 @@ internal readonly struct ConsoleBuffer {
     /// <summary>
     /// Create a slice from the current <see cref="ConsoleBuffer"/>.
     /// </summary>
-    /// <param name="buffer">Source of the buffer.</param>
-    /// <param name="from">Absolute index of the buffer.</param>
-    /// <param name="scale">Scale of the buffer.</param>
+    /// <param name="buffer">Source of the from.</param>
+    /// <param name="from">Absolute index of the from.</param>
+    /// <param name="scale">Scale of the from.</param>
     /// <returns>Return a <see cref="Canvas"/> instance.</returns>
     public static Canvas Slice(ref ConsoleBuffer buffer, (int X, int Y) from, (int X, int Y) scale) {
         if (from.X < 0) scale.X += from.X;

@@ -13,6 +13,7 @@ public class CuityEntity {
     private readonly List<IComponent> m_components = null!;
 
     private readonly Dictionary<Type, int> m_uniqueComponents = null!;
+    private int m_version = 0;
 
     /// <summary>
     /// Name of the <see cref="CuityEntity"/> instance.
@@ -20,11 +21,17 @@ public class CuityEntity {
     public string Name { get => m_name; }
 
     /// <summary>
+    /// Version of the entity.
+    /// </summary>
+    internal int Version { get => m_version; set => m_version = value; }
+
+    /// <summary>
     /// Create a new <see cref="CuityEntity"/> with specific name.
     /// </summary>
     /// <param name="name">Name of the instance.</param>
     public CuityEntity(string name) {
         m_name = name;
+        m_version = 0;
 
         m_components = new List<IComponent>();
         m_uniqueComponents = new Dictionary<Type, int>();
@@ -35,15 +42,21 @@ public class CuityEntity {
     /// </summary>
     /// <typeparam name="T">Type of the instance.</typeparam>
     /// <param name="component">Pre-defined value of the component. If this <see langword="null"/>, then the system creates a default component.</param>
-    /// <param name="isUnique">Indicates the component is unique on the <see cref="CuityEntity"/></param>
+    /// <param name="isUnique">Indicates the component is unique on the <see cref="CuityEntity"/>.</param>
     /// <exception cref="ArgumentException"/>
-    public void AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, new() {
+    /// <returns>Return <see langword="true"/> if the component is added to the entity. Otherwise return <see langword="false"/>.</returns>
+    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, new() {
         component ??= new T();
 
-        if (isUnique && !m_uniqueComponents.TryAdd(component is IRenderable ? typeof(IRenderable) : typeof(T), m_components.Count))
-            throw new ArgumentException(message: "The entity has a same component.");
+        if(isUnique || component is RenderComponent) {
+            if(!m_uniqueComponents.TryAdd(component is RenderComponent ? typeof(RenderComponent) : typeof(T), m_components.Count))
+                return false;
+        }
 
         this.m_components.Add(component);
+        ++m_version;
+
+        return true;
     }
 
     /// <summary>
@@ -56,10 +69,9 @@ public class CuityEntity {
             return m_components[i] as T;
 
         int current = 0;
-
         foreach (IComponent component in m_components) {
             if (component is T) {
-                if(++current == index)
+                if(current++ == index)
                     return component as T;
             }
         }
@@ -74,8 +86,12 @@ public class CuityEntity {
     /// <param name="index">Indicates where we want delete the component.</param>
     public void RemoveComponent<T>(int index = 0) where T: class, IComponent {
         if (m_uniqueComponents.TryGetValue(typeof(T), out int i)) {
+            IComponent component = m_components[i];
+
             m_components.RemoveAt(i);
-            m_uniqueComponents.Remove(typeof(T));
+            m_uniqueComponents.Remove(component is RenderComponent ? typeof(RenderComponent) : typeof(T));
+
+            ++m_version;
             return;
         }
 
@@ -84,10 +100,23 @@ public class CuityEntity {
         foreach (IComponent component in m_components) {
             if (component is T) {
                 if (++indexOf == index) {
+
                     m_components.RemoveAt(index);
+                    ++m_version;
                     return;
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Resolve all <see cref="IStyleComponent"/> instances, which attached to the current instance.
+    /// </summary>
+    /// <returns>Return a <see cref="IEnumerable{T}"/> instance.</returns>
+    internal IEnumerable<IStyleComponent> ResolveStyles() {
+        foreach(IComponent component in m_components) {
+            if(component is IStyleComponent)
+                yield return (component as IStyleComponent)!;
         }
     }
 }

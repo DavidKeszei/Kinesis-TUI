@@ -11,14 +11,16 @@ namespace Cuity.Rendering;
 /// </summary>
 public class Renderer {
     private const float MAX_FPS = 16.6f;
+    private const int MAX_STACK = 16_384;
 
-    private readonly List<CuityEntity> m_entites = null!;
     private ConsoleBuffer m_frontBuffer = default!;
-
     private ConsoleBuffer m_backBuffer = default!;
+
+    private StreamWriter m_output = null!;
     private (int X, int Y) m_scale = (0, 0);
 
     private float m_currentFrameTime = .0f;
+    private float m_deltaTime = .0f;
 
     /// <summary>
     /// Current scale of the screen.
@@ -28,7 +30,12 @@ public class Renderer {
     /// <summary>
     /// Current frame/second value by the engine from the frame time.
     /// </summary>
-    public float CurrentFPS { get => 1000 / m_currentFrameTime; }
+    public float FPS { get => 1000f / m_currentFrameTime; }
+
+    /// <summary>
+    /// Indicates the elapsed time between two frames. Sometimes call this as "delta-time".
+    /// </summary>
+    public float FrameTime { get => m_currentFrameTime; }
 
     /// <summary>
     /// Create a new <see cref="Renderer"/> instance with specific <paramref name="x"/> and <paramref name="y"/> scale.
@@ -40,58 +47,71 @@ public class Renderer {
         m_backBuffer = new ConsoleBuffer(x, y);
 
         m_scale = (x, y);
-        m_entites = new List<CuityEntity>();
+        m_output = new StreamWriter(stream: Console.OpenStandardOutput());
+
+        m_output.AutoFlush = false;
     }
 
     /// <summary>
-    /// Start the rendering process of the application.
+    /// Render one frame to the screen.
     /// </summary>
-    public void Render() {
+    /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
+    public void Render(List<CuityEntity> entities) {
         Console.CursorVisible = false;
+        DateTime start = DateTime.Now;
 
-        while (true) {
-            DateTime start = DateTime.Now;
+        foreach(CuityEntity entity in entities) {
+            Transform transform = entity.GetComponent<Transform>()!;
+            RenderComponent? renderLogic = entity.GetComponent<RenderComponent>();
 
-            foreach (CuityEntity entity in m_entites) {
-                Transform transform = entity.GetComponent<Transform>()!;
-                IRenderable renderLogic = entity.GetComponent<IRenderable>()!;
+            if(renderLogic != null && renderLogic.IsDirty) {
+                Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
 
-                if (renderLogic.IsDirty) {
-                    Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
-                    renderLogic.Render(buffer: in canvas);
-
-                    renderLogic.IsDirty = false;
-                }
+                renderLogic.Render(buffer: in canvas, version: entity.Version, styles: entity.ResolveStyles());
+                renderLogic.IsDirty = false;
             }
-
-            Diffing();
-            float frameTime = (float)(DateTime.Now - start).TotalMilliseconds;
-
-            if (frameTime < MAX_FPS)
-                Thread.Sleep(millisecondsTimeout: (int)(MAX_FPS - frameTime));
-
-            Console.Out.Write("\x1b[0m");
         }
+
+        Diffing();
+        float frameTime = (float)(DateTime.Now - start).TotalMilliseconds;
+
+        if(frameTime < MAX_FPS)
+            Thread.Sleep(millisecondsTimeout: (int)(MAX_FPS - frameTime));
     }
 
-#if DEBUG
-
-    public void AddEntity(CuityEntity entity) => m_entites.Add(entity);
-
-#endif
-
+    /// <summary>
+    /// Check every "pixel" for changed behavior.
+    /// </summary>
     private void Diffing() {
+        VT100StringBuilder builder = new VT100StringBuilder(buffer: stackalloc char[MAX_STACK]);
+        int written = 0;
+
         for (int x = 0; x < m_scale.X; ++x) {
             for (int y = 0; y < m_scale.Y; ++y) {
-                ref vt_char ch = ref m_frontBuffer[x, y];
 
-                if (!ch.Equals(m_backBuffer[x, y])) {
-                    Console.SetCursorPosition(x, y);
-                    Console.Out.Write(value: m_backBuffer[x, y].ToVT100Str());
+                ref vt_char ch = ref m_frontBuffer[x, y];
+                ref vt_char b_ch = ref m_backBuffer[x, y];
+
+                if (!ch.Equals(b_ch)) {
+
+                    written += builder.WritePosition(x, y)
+                                      .WriteFontStyles(flags: b_ch.Styles)
+                                        .WriteColor(color: b_ch.Background, isBackground: true)
+                                        .WriteColor(color: b_ch.Foreground, isBackground: false)
+                                      .WriteCharacter(value: b_ch.Character)
+                                           .Build(destination: m_output);
+                }
+
+                if(MAX_STACK - written < VT100StringBuilder.MAX_COMMAND_LEN) {
+                    m_output.Flush();
+
+                    builder.Clear();
+                    written = 0;
                 }
             }
         }
 
-        m_frontBuffer.Copy(in m_backBuffer);
+        m_output.Flush();
+        m_frontBuffer.Copy(from: in m_backBuffer);
     }
 }
