@@ -7,17 +7,17 @@ using System.Text;
 namespace Cuity;
 
 /// <summary>
-/// Represent heart of the library: This connects all systems to one class.
+/// Represent the heart of the library: This connects all systems to one class.
 /// </summary>
 public sealed class Engine {
     private readonly Renderer m_renderer = null!;
-    private readonly InputSystem m_input = null!;
+    private readonly InputHandler m_input = null!;
     
     /// <summary>
     /// Create a new <see cref="Engine"/> instance.
     /// </summary>
     public Engine() {
-        m_input = new InputSystem();
+        m_input = new InputHandler();
         m_renderer = new Renderer(x: Console.BufferWidth, y: Console.BufferHeight);
     }
 

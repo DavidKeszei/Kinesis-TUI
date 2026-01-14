@@ -10,8 +10,8 @@ namespace Cuity.Rendering;
 /// Represent the rendering engine of the library.
 /// </summary>
 public class Renderer {
+    private const int MAX_STACK_BUFFER_LEN = 16_384;
     private const float MAX_FPS = 16.6f;
-    private const int MAX_STACK = 16_384;
 
     private ConsoleBuffer m_frontBuffer = default!;
     private ConsoleBuffer m_backBuffer = default!;
@@ -83,7 +83,7 @@ public class Renderer {
     /// Check every "pixel" for changed behavior.
     /// </summary>
     private void Diffing() {
-        VT100StringBuilder builder = new VT100StringBuilder(buffer: stackalloc char[MAX_STACK]);
+        VT100StringBuilder builder = new VT100StringBuilder(buffer: stackalloc char[MAX_STACK_BUFFER_LEN]);
         int written = 0;
 
         for (int x = 0; x < m_scale.X; ++x) {
@@ -102,7 +102,7 @@ public class Renderer {
                                            .Build(destination: m_output);
                 }
 
-                if(MAX_STACK - written < VT100StringBuilder.MAX_COMMAND_LEN) {
+                if(MAX_STACK_BUFFER_LEN - written < VT100StringBuilder.MAX_COMMAND_LEN) {
                     m_output.Flush();
 
                     builder.Clear();
