@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Cuity.Input;
 
-public enum InputActionType: byte {
+public enum InputAction: byte {
     PRESS,
     HOLD
 }
