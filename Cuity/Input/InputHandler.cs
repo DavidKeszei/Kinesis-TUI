@@ -2,119 +2,97 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
 namespace Cuity.Input;
 
-public readonly record struct InputMessage(InputKey Key, InputModifier Modifier, InputAction Action);
+public readonly record struct InputMessage(char Key, InputModifier Modifier, InputAction Action);
 
 public class InputHandler {
     /// <summary>
-    /// Threshold of the holding in ms. (200ms)
-    /// </summary>
-    private const int HOLD_TRESHOLD = 200;
-
-    /// <summary>
     /// Minimum time, when we think no input was happened & fire. (50ms)
     /// </summary>
-    private const int DEAD_SPACE = 50;
+    private const int DEAD_ZONE = 10;
 
-    /// <summary>
-    /// Minimal window value between the "ghost" input and long-press input.
-    /// </summary>
-    private const int GHOST_WINDOW = 35;
-     
-    private (InputKey Key, InputModifier Modifier, TimeSpan When) m_startInputInfo = (InputKey.NONE, InputModifier.NONE, TimeSpan.Zero);
-    private InputMessage m_currentMessage = default!;
+    private const int HOLD_THRESHHOLD = 250;
 
-    private bool m_isLongPress = false;
+    private (char Key, InputModifier Modifier, TimeSpan When) m_startInputInfo = ('\0', InputModifier.NONE, TimeSpan.Zero);
+    private IInputBackend m_backend = null!;
 
-    public InputHandler() 
-        => m_currentMessage = new InputMessage(InputKey.NONE, InputModifier.NONE, InputAction.PRESS);
+    public InputHandler() {
+        m_backend = RuntimeInformation.IsOSPlatform(osPlatform: OSPlatform.Windows) ? WindowsInputBackend.Init() : null!;
+    }
 
     public void Start() {
-        float remainedDeadSpace = DEAD_SPACE;
+        float deadZoneTime = DEAD_ZONE;
+
+        InputMessage message = default;
+        InputAction currentAction = InputAction.PRESS;
 
         while (true) {
             DateTime now = DateTime.UtcNow;
-            int pressTime = (int)(now - m_startInputInfo.When).TimeOfDay.TotalMilliseconds;
 
-            if (Console.KeyAvailable) {
-                (InputKey key, InputModifier modifier) = Read(info: Console.ReadKey(true));
+            if (m_backend.HasInput) {
+                (char character, InputModifier modifiers) = m_backend.ReadInput();
 
-                if (key == InputKey.NONE) continue;
+                if(character == '\0')
+                    continue;
 
-                if (m_startInputInfo.Key == key && m_startInputInfo.Modifier == modifier) {
-                    /* 35ms window between ghost & long press */
-                    Console.WriteLine((now.TimeOfDay - m_startInputInfo.When).TotalMilliseconds);
+                if (m_startInputInfo.Key == character && m_startInputInfo.Modifier == modifiers) {
 
-                    if(!m_isLongPress && pressTime >= HOLD_TRESHOLD) {
+                    if((now.TimeOfDay - m_startInputInfo.When).TotalMilliseconds >= HOLD_THRESHHOLD) {
+                        message = new InputMessage(Key: m_startInputInfo.Key,
+                                                          Modifier: m_startInputInfo.Modifier,
+                                                          Action: currentAction);
 
-                        m_currentMessage = new InputMessage(Key: m_startInputInfo.Key,
-                                                            Modifier: m_startInputInfo.Modifier,
-                                                            Action: InputAction.HOLD);
-
-                        m_isLongPress = true;
-                        Console.WriteLine($"<INPUT> Key: {m_currentMessage.Key}, Time: {pressTime}ms, {m_isLongPress}");
+                        if(currentAction != InputAction.HOLD)
+                            Console.Out.WriteLineAsync($"<INPUT> Key: {message.Key}, Action: {Enum.GetName<InputAction>(InputAction.HOLD)} - H");
+                        currentAction = InputAction.HOLD;
                     }
 
-                    remainedDeadSpace = DEAD_SPACE;
+                    continue;
                 }
-                else if (m_startInputInfo.Key != key || m_startInputInfo.Modifier != modifier) {
+                else if (m_startInputInfo.Key != character || m_startInputInfo.Modifier != modifiers) {
                     if (m_startInputInfo.When != TimeSpan.Zero) {
 
-                        m_currentMessage = new InputMessage(Key: m_startInputInfo.Key,
-                                                            Modifier: m_startInputInfo.Modifier,
-                                                            Action: InputAction.PRESS);
+                        message = new InputMessage(Key: m_startInputInfo.Key,
+                                                   Modifier: m_startInputInfo.Modifier,
+                                                   Action: currentAction);
 
-                        remainedDeadSpace = DEAD_SPACE;
+                        deadZoneTime = DEAD_ZONE;
+                        Console.Out.WriteLineAsync($"<INPUT> Key: {message.Key}, Action: {Enum.GetName<InputAction>(currentAction)} - F");
                     }
 
-                    m_startInputInfo = (key, modifier, now.TimeOfDay);
+                    m_startInputInfo = (character, modifiers, now.TimeOfDay);
                 }
 
                 continue;
             }
 
-            if (remainedDeadSpace <= 0) {
-                if(m_currentMessage.Action != InputAction.HOLD && m_currentMessage.Key != m_startInputInfo.Key) {
-                    m_currentMessage = new InputMessage(Key: m_startInputInfo.Key,
-                                                        Modifier: m_startInputInfo.Modifier,
-                                                        Action: InputAction.PRESS);
+            if (deadZoneTime <= 0) {
+                if(currentAction != InputAction.HOLD) {
+                    message = new InputMessage(Key: m_startInputInfo.Key,
+                                               Modifier: m_startInputInfo.Modifier,
+                                               Action: currentAction);
 
-                    Console.WriteLine($"<INPUT> Key: {m_currentMessage.Key}, Time: {pressTime}ms");
+                    Console.Out.WriteLineAsync($"<INPUT> Key: {message.Key}, Action: {Enum.GetName<InputAction>(currentAction)} - P");
                 }
 
-                m_startInputInfo = (InputKey.NONE, InputModifier.NONE, TimeSpan.Zero);
-                m_currentMessage = new InputMessage(InputKey.NONE, InputModifier.NONE, InputAction.PRESS);
+                m_startInputInfo = ('\0', InputModifier.NONE, TimeSpan.Zero);
 
-                m_isLongPress = false;
-                remainedDeadSpace = DEAD_SPACE;
-
+                deadZoneTime = DEAD_ZONE;
+                currentAction = InputAction.PRESS;
                 continue;
             }
 
-            if(m_startInputInfo.When != TimeSpan.Zero)
-                remainedDeadSpace -= (float)(DateTime.UtcNow - now).TotalMilliseconds;
+
+            if(m_startInputInfo.When != TimeSpan.Zero) {
+                float inputTime = (float)(DateTime.UtcNow - now).TotalMilliseconds;
+                deadZoneTime -= inputTime;
+            }
         }
-    }
 
-    private (InputKey, InputModifier) Read(ConsoleKeyInfo info) {
-        InputKey key = info.Key switch {
-            ConsoleKey.A => InputKey.A,
-            ConsoleKey.S => InputKey.S,
-            _ => InputKey.NONE
-        };
-
-        InputModifier modifier = info.Modifiers switch {
-            ConsoleModifiers.Shift   => InputModifier.SHIFT,
-            ConsoleModifiers.Alt     => InputModifier.ALT,
-
-            ConsoleModifiers.Control => InputModifier.CTRL,
-            _ => InputModifier.NONE
-        };
-
-        return (key, modifier);
     }
 }

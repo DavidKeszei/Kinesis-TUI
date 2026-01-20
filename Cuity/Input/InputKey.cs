@@ -12,9 +12,12 @@ public enum InputKey: byte {
     D
 }
 
-public enum InputModifier: byte {
+[Flags]
+public enum InputModifier: int {
     NONE,
-    SHIFT,
-    CTRL,
-    ALT
+    L_SHIFT = 0xA0,
+    R_SHIFT = 0xA1,
+    L_CTRL  = 0xA2,
+    R_CTRL  = 0xA3,
+    ALT     = 0x12 
 }

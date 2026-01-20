@@ -43,7 +43,6 @@ public class CuityEntity {
     /// <typeparam name="T">Type of the instance.</typeparam>
     /// <param name="component">Pre-defined value of the component. If this <see langword="null"/>, then the system creates a default component.</param>
     /// <param name="isUnique">Indicates the component is unique on the <see cref="CuityEntity"/>.</param>
-    /// <exception cref="ArgumentException"/>
     /// <returns>Return <see langword="true"/> if the component is added to the entity. Otherwise return <see langword="false"/>.</returns>
     public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, new() {
         component ??= new T();
