@@ -4,14 +4,6 @@ using System.Text;
 
 namespace Cuity.Input;
 
-public enum InputKey: byte {
-    NONE,
-    W,
-    A,
-    S,
-    D
-}
-
 [Flags]
 public enum InputModifier: int {
     NONE,

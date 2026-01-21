@@ -22,7 +22,7 @@ internal partial class WindowsInputBackend: IInputBackend {
     private const uint STD_IN = uint.MaxValue - 10 + 1;
     private const int MAX_CHAR = 1;
 
-    private const int TO_LOWER = 32;
+    private const int UTF8_PAGE = 65001;
 
     #endregion
 
@@ -30,7 +30,7 @@ internal partial class WindowsInputBackend: IInputBackend {
     private nint m_handle = nint.Zero;
 
     private (char Key, InputModifier Modifiers) m_message = ('\0', InputModifier.NONE);
-    private bool m_canRead = true;
+    private int m_canRead = 0;
 
     public bool HasInput { get => IsKeyDown(character: (short)m_message.Key); }
 
@@ -53,6 +53,10 @@ internal partial class WindowsInputBackend: IInputBackend {
     [LibraryImport(libraryName: USER32_LIB, EntryPoint = "VkKeyScanW")]
     private static partial short GetCode(int character);
 
+    [LibraryImport(libraryName: KERNEL32_LIB, EntryPoint = "SetConsoleOutputCP")]
+    [return: MarshalAs(unmanagedType: UnmanagedType.Bool)]
+    private static partial bool SetOutputEncoding(uint page);
+
     #endregion
 
     public static IInputBackend Init() {
@@ -63,23 +67,26 @@ internal partial class WindowsInputBackend: IInputBackend {
         if(!SetMode(handle: backend.m_handle, flags: MANUAL_PROCESSING))
             return IInputBackend.ERR;
 
-        backend.m_rawInputTask = Task.Run(() => {
+        backend.m_rawInputTask = Task.Run(async() => {
             while(true) {
                 if(backend.Read(out char character, out InputModifier modifiers)) {
                     backend.m_message = (character, modifiers);
-                    backend.m_canRead = false;
+                    Interlocked.Increment(ref backend.m_canRead);
                 }
             }
         });
+
+        if (!SetOutputEncoding(page: UTF8_PAGE))
+            return IInputBackend.ERR;
 
         return backend;
     }
 
     public (char Key, InputModifier Modifiers) ReadInput() {
-        if(m_canRead)
+        if(m_canRead == 0)
             return ('\0', InputModifier.NONE);
 
-        m_canRead = true;
+        Interlocked.Decrement(ref m_canRead);
         return m_message;
     }
 
@@ -111,6 +118,8 @@ internal partial class WindowsInputBackend: IInputBackend {
 
     private bool IsKeyDown(short character) {
         short code = GetCode(character);
+
+        /* Clean up the flag bits (SHIFT, CTRL, ALT, RESERVED)*/
         code &= ~(1 << 8);
         code &= ~(1 << 9);
         code &= ~(1 << 10);

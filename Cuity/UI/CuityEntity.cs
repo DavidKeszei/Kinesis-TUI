@@ -9,10 +9,10 @@ namespace Cuity.UI;
 /// Represent a plain, tagged instance of the library.
 /// </summary>
 public class CuityEntity {
-    private readonly string m_name = string.Empty;
     private readonly List<IComponent> m_components = null!;
-
     private readonly Dictionary<Type, int> m_uniqueComponents = null!;
+
+    private readonly string m_name = string.Empty;
     private int m_version = 0;
 
     /// <summary>

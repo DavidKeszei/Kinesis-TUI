@@ -26,7 +26,7 @@ public sealed class Engine {
     /// </summary>
     public void Start(CancellationToken token = default) {
         /* Start main parts of the engine on different threads. (Input, Workers)*/
-        Task.Run(action: () => m_input.Start(), token);
+        Task.Run(action: () => m_input.Listen(), token);
 
         while(!token.IsCancellationRequested) {
 
