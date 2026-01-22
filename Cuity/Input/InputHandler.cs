@@ -21,7 +21,7 @@ public readonly record struct InputMessage(char Key, InputModifier Modifier, Inp
 /// </summary>
 public class InputHandler {
     /// <summary>
-    /// Inidcates the wait time between two sampling. (5ms)
+    /// Indicates the wait time between two sampling. (5ms)
     /// </summary>
     private const int POOLING_TIME = 5;
 
@@ -42,7 +42,7 @@ public class InputHandler {
         => m_backend = RuntimeInformation.IsOSPlatform(osPlatform: OSPlatform.Windows) ? WindowsInputBackend.Init() : null!;
 
     /// <summary>
-    /// Listen inputs from standart input.
+    /// Listen inputs from standard input.
     /// </summary>
     public void Listen() {
         float deadZoneTime = DEAD_ZONE;
