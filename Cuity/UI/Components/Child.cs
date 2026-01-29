@@ -8,10 +8,10 @@ namespace Cuity.UI.Components;
 /// <summary>
 /// Represent a component, which can hold a <typeparamref name="T"/> instance.
 /// </summary>
-/// <typeparam name="T">A <see cref="CuityEntity"/> as child.</typeparam>
-public class Child<T>: IComponent where T: CuityEntity {
+/// <typeparam name="T">A <see cref="Entity"/> as child.</typeparam>
+public class Child: IComponent {
     private const string NAME_OF = "ChildContainer";
-    private T m_child = null!;
+    private Entity m_child = null!;
 
     /// <summary>
     /// Name of the component.
@@ -21,5 +21,5 @@ public class Child<T>: IComponent where T: CuityEntity {
     /// <summary>
     /// Attached child object as <typeparamref name="T"/>.
     /// </summary>
-    public T Attached { get => m_child; set => m_child = value; }
+    public Entity Attached { get => m_child; set => m_child = value; }
 }

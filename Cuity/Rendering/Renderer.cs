@@ -50,17 +50,19 @@ public class Renderer {
         m_output = new StreamWriter(stream: Console.OpenStandardOutput());
 
         m_output.AutoFlush = false;
+
+        Console.CursorVisible = false;
+        Console.OutputEncoding = Encoding.UTF8;
     }
 
     /// <summary>
     /// Render one frame to the screen.
     /// </summary>
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
-    public void Render(List<CuityEntity> entities) {
-        Console.CursorVisible = false;
+    public void Render(List<Entity> entities) {
         DateTime start = DateTime.Now;
 
-        foreach(CuityEntity entity in entities) {
+        foreach(Entity entity in entities) {
             Transform transform = entity.GetComponent<Transform>()!;
             RenderComponent? renderLogic = entity.GetComponent<RenderComponent>();
 

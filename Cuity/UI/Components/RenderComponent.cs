@@ -13,7 +13,7 @@ public abstract class RenderComponent: IComponent {
     protected readonly Dictionary<StyleTag, IStyleComponent> m_cache = null!;
 
     protected int m_entityVersion = 0;
-    private bool m_isDirty = true;
+    private volatile bool m_isDirty = true;
 
     /// <summary>
     /// Name of the <see cref="RenderComponent"/>.

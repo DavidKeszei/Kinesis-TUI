@@ -5,7 +5,7 @@ using System.Text;
 namespace Cuity.UI.Components;
 
 /// <summary>
-/// Represent a component, which contains the transform of a <see cref="CuityEntity"/>.
+/// Represent a component, which contains the transform of a <see cref="Entity"/>.
 /// </summary>
 public class Transform: IComponent {
     private const string NAME_OF = "Transform";

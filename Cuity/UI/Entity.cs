@@ -1,5 +1,6 @@
 ﻿using Cuity.Rendering;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace Cuity.UI;
 /// <summary>
 /// Represent a plain, tagged instance of the library.
 /// </summary>
-public class CuityEntity {
+public class Entity: IEnumerable<IComponent> {
     private readonly List<IComponent> m_components = null!;
     private readonly Dictionary<Type, int> m_uniqueComponents = null!;
 
@@ -16,7 +17,7 @@ public class CuityEntity {
     private int m_version = 0;
 
     /// <summary>
-    /// Name of the <see cref="CuityEntity"/> instance.
+    /// Name of the <see cref="Entity"/> instance.
     /// </summary>
     public string Name { get => m_name; }
 
@@ -26,10 +27,10 @@ public class CuityEntity {
     internal int Version { get => m_version; set => m_version = value; }
 
     /// <summary>
-    /// Create a new <see cref="CuityEntity"/> with specific name.
+    /// Create a new <see cref="Entity"/> with specific name.
     /// </summary>
     /// <param name="name">Name of the instance.</param>
-    public CuityEntity(string name) {
+    public Entity(string name) {
         m_name = name;
         m_version = 0;
 
@@ -42,10 +43,11 @@ public class CuityEntity {
     /// </summary>
     /// <typeparam name="T">Type of the instance.</typeparam>
     /// <param name="component">Pre-defined value of the component. If this <see langword="null"/>, then the system creates a default component.</param>
-    /// <param name="isUnique">Indicates the component is unique on the <see cref="CuityEntity"/>.</param>
+    /// <param name="isUnique">Indicates the component is unique on the <see cref="Entity"/>.</param>
     /// <returns>Return <see langword="true"/> if the component is added to the entity. Otherwise return <see langword="false"/>.</returns>
-    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, new() {
-        component ??= new T();
+    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent {
+        if (component == null)
+            return false;
 
         if(isUnique || component is RenderComponent) {
             if(!m_uniqueComponents.TryAdd(component is RenderComponent ? typeof(RenderComponent) : typeof(T), m_components.Count))
@@ -79,7 +81,7 @@ public class CuityEntity {
     }
 
     /// <summary>
-    /// Remove a component from the current <see cref="CuityEntity"/>.
+    /// Remove a component from the current <see cref="Entity"/>.
     /// </summary>
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <param name="index">Indicates where we want delete the component.</param>
@@ -117,5 +119,14 @@ public class CuityEntity {
             if(component is IStyleComponent)
                 yield return (component as IStyleComponent)!;
         }
+    }
+
+    public IEnumerator<IComponent> GetEnumerator() {
+        foreach (IComponent component in m_components)
+            yield return component;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+        return GetEnumerator();
     }
 }
