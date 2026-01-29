@@ -23,6 +23,7 @@ internal partial class WindowsInputBackend: IInputBackend {
     private const int MAX_CHAR = 1;
 
     private const int UTF8_PAGE = 65001;
+    private const string DEDICATED_THREAD_NAME = "THREAD::INPUT::NATIVE";
 
     #endregion
 
@@ -67,7 +68,9 @@ internal partial class WindowsInputBackend: IInputBackend {
         if(!SetMode(handle: backend.m_handle, flags: MANUAL_PROCESSING))
             return IInputBackend.ERR;
 
-        backend.m_rawInputTask = Task.Run(async() => {
+        backend.m_rawInputTask = Task.Run(() => {
+            Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
+
             while(true) {
                 if(backend.Read(out char character, out InputModifier modifiers)) {
                     backend.m_message = (character, modifiers);

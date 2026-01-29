@@ -31,8 +31,3 @@ internal interface IInputBackend {
     /// <returns>Return a initialized <see cref="IInputBackend"/> instance.</returns>
     public abstract static IInputBackend Init();
 }
-
-/// <summary>
-/// Represent a native keystroke from the console input.
-/// </summary>
-internal record struct NativeInputMessage();
