@@ -34,6 +34,11 @@ public abstract class RenderComponent: IComponent {
         => m_cache = new Dictionary<StyleTag, IStyleComponent>();
 
     /// <summary>
+    /// Propagate changes on the <see cref="RenderComponent"/>.
+    /// </summary>
+    public void UpdateChanges() => m_isDirty = true;
+
+    /// <summary>
     /// Render the component to the screen.
     /// </summary>
     /// <param name="buffer">Portion of the screen buffer.</param>

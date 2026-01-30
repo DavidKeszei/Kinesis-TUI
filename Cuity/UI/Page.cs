@@ -6,35 +6,51 @@ using System.Text;
 namespace Cuity.UI;
 
 /// <summary>
-/// Represent a UI page on the screen.
+/// Represent an UI page on the screen.
 /// </summary>
 public abstract class Page {
+    private readonly List<Entity> m_renderSet = null!;
+    private bool m_pageIsDirty = true;
+
+    /// <summary>
+    /// Created <see cref="Entity"/> instance-tree as "list".
+    /// </summary>
+    internal IEnumerable<Entity> UIElements { get => m_renderSet; }
+
+    public Page()
+        => m_renderSet = new List<Entity>(capacity: 32);
+
     /// <summary>
     /// Build the page as <see cref="Entity"/>.
     /// </summary>
     /// <returns>Return <see cref="Entity"/> instance from the current <see cref="Page"/>.</returns>
-    public abstract Entity Build();
+    protected abstract Entity? Build();
 
     /// <summary>
-    /// Iterate through the current <see cref="Page"/> as flat struckture.
+    /// Indicates the whole page is dirty. Most of the time, when new <see cref="Entity"/> added to the tree.
     /// </summary>
-    /// <returns>Return as <see cref="IEnumerable{T}"/> instance.</returns>
-    internal IEnumerable<Entity> Iterate() {
-        Entity? root = Build();
+    protected void IsDirty() => m_pageIsDirty = true;
 
-        if (root == null) yield break;
-        else yield return root;
+    /// <summary>
+    /// Move through the tree and create list from it.
+    /// </summary>
+    /// <param name="entity">Current target entity of the call.</param>
+    internal void CreateRenderSet(Entity? entity = null!) {
+        if (m_pageIsDirty) {
+            entity = Build();
+            m_renderSet.Clear();
 
-        int rootChildCount = root.Count(static x => x.Name == nameof(Child));
+            m_pageIsDirty = false;
+        }
 
-        Child? child = root.GetComponent<Child>();
-        Entity? current = null!;
+        if (entity == null) return;
 
-        for (int i = 0; i < rootChildCount; ++i) {
-            current = child!.Attached;
-            yield return current;
+        m_renderSet.Add(entity);
+        int childrenCount = entity.Count(static x => x.Name == "Child");
 
-            
+        for (int i = 0; i < childrenCount; ++i) {
+            Child child = entity.GetComponent<Child>(i)!;
+            CreateRenderSet(entity: child.Attached);
         }
     }
 }

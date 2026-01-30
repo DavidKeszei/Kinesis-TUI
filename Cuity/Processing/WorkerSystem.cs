@@ -5,25 +5,27 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-using WorkTarget = System.Action<float, Cuity.Input.InputMessage>;
-
-namespace Cuity;
+namespace Cuity.Processing;
 
 /// <summary>
 /// Represent a bunch of workers for different tasks.
 /// </summary>
 internal class WorkerSystem: ISystem {
     private const string DEDICATED_THREAD_NAME = "THREAD::WORKER";
-
-    private readonly Renderer m_renderer = null!;
+    private static WorkerSystem m_instance = null!;
 
     private ConcurrentQueue<InputMessage> m_inputs = null!;
-    private ConcurrentQueue<WorkTarget> m_targets = null!;
+    private ConcurrentQueue<Action<InputMessage>> m_targets = null!;
 
-    public WorkerSystem(Renderer renderer) {
-        m_renderer = renderer;
+    /// <summary>
+    /// Current instance of the <see cref="WorkerSystem"/>.
+    /// </summary>
+    public static WorkerSystem Instance { get => m_instance; }
 
-        m_targets = new ConcurrentQueue<WorkTarget>();
+    public WorkerSystem() {
+        WorkerSystem.m_instance ??= this;
+
+        m_targets = new ConcurrentQueue<Action<InputMessage>>();
         m_inputs = new ConcurrentQueue<InputMessage>();
     }
     
@@ -34,20 +36,22 @@ internal class WorkerSystem: ISystem {
     public void AddInputMessage(InputMessage message) => m_inputs.Enqueue(message);
 
     /// <summary>
-    /// Add work <paramref name="target"/> to the queueu.
+    /// Add <paramref name="work"/> to the queueu.
     /// </summary>
-    /// <param name="target">Current work item.</param>
-    public void AddQueueAction(WorkTarget target) => m_targets.Enqueue(target);
+    /// <param name="work">Current work item.</param>
+    public void AddQueueAction(Action<InputMessage> work) => m_targets.Enqueue(work);
 
     public void Start() {
         Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
 
         while(true) {
-            if (!m_inputs.TryDequeue(out InputMessage message)) 
+            if (!m_inputs.TryDequeue(out InputMessage message)) {
+                Thread.Sleep(millisecondsTimeout: 5);
                 continue;
+            }
 
-            foreach (WorkTarget target in m_targets)
-                target(m_renderer.FrameTime, message);
+            foreach (Action<InputMessage> work in m_targets)
+                work(message);
         }
     }
 }

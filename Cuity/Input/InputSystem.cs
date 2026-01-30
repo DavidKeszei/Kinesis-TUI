@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cuity.Processing;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -71,12 +72,9 @@ internal class InputSystem: ISystem {
     private const int HOLD_THRESHHOLD = 75;
 
     private readonly IInputBackend m_backend = null!;
-    private readonly WorkerSystem m_workerSystem = null!;
-
     private (char Key, InputModifier Modifier, TimeSpan When) m_startInputInfo = ('\0', InputModifier.NONE, TimeSpan.Zero);
 
-    public InputSystem(WorkerSystem workers) {
-        m_workerSystem = workers;
+    public InputSystem() {
         m_backend = RuntimeInformation.IsOSPlatform(osPlatform: OSPlatform.Windows) ? WindowsInputBackend.Init() : null!;
     }
 
@@ -106,13 +104,13 @@ internal class InputSystem: ISystem {
                     if ((now.TimeOfDay - m_startInputInfo.When).TotalMilliseconds >= HOLD_THRESHHOLD && lastAction != InputAction.HOLD) {
 
                         lastAction = InputAction.HOLD;
-                        m_workerSystem.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.HOLD));
+                        WorkerSystem.Instance.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.HOLD));
                     }
                 }
                 else if (m_startInputInfo.Key != character || m_startInputInfo.Modifier != modifiers) {
                     if (m_startInputInfo.When != TimeSpan.Zero) {
 
-                        m_workerSystem.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
+                        WorkerSystem.Instance.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
                         deadZoneTime = DEAD_ZONE;
                     }
 
@@ -126,7 +124,7 @@ internal class InputSystem: ISystem {
 
             if (deadZoneTime <= 0) {
                 if (lastAction != InputAction.HOLD)
-                    m_workerSystem.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
+                    WorkerSystem.Instance.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
 
                 m_startInputInfo = ('\0', InputModifier.NONE, TimeSpan.Zero);
 

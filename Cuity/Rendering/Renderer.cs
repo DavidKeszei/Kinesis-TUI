@@ -19,8 +19,7 @@ public class Renderer {
     private StreamWriter m_output = null!;
     private (int X, int Y) m_scale = (0, 0);
 
-    private float m_currentFrameTime = .0f;
-    private float m_deltaTime = .0f;
+    private static float m_currentFrameTime = .0f;
 
     /// <summary>
     /// Current scale of the screen.
@@ -30,12 +29,12 @@ public class Renderer {
     /// <summary>
     /// Current frame/second value by the engine from the frame time.
     /// </summary>
-    public float FPS { get => 1000f / m_currentFrameTime; }
+    public static float FPS { get => 1000f / m_currentFrameTime; }
 
     /// <summary>
     /// Indicates the elapsed time between two frames. Sometimes call this as "delta-time".
     /// </summary>
-    public float FrameTime { get => m_currentFrameTime; }
+    public static float FrameTime { get => m_currentFrameTime; }
 
     /// <summary>
     /// Create a new <see cref="Renderer"/> instance with specific <paramref name="x"/> and <paramref name="y"/> scale.
@@ -59,7 +58,7 @@ public class Renderer {
     /// Render one frame to the screen.
     /// </summary>
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
-    public void Render(List<Entity> entities) {
+    public void Render(IEnumerable<Entity> entities) {
         DateTime start = DateTime.Now;
 
         foreach(Entity entity in entities) {
@@ -75,10 +74,10 @@ public class Renderer {
         }
 
         Diffing();
-        float frameTime = (float)(DateTime.Now - start).TotalMilliseconds;
+        m_currentFrameTime = (float)(DateTime.Now - start).TotalMilliseconds;
 
-        if(frameTime < MAX_FPS)
-            Thread.Sleep(millisecondsTimeout: (int)(MAX_FPS - frameTime));
+        if(m_currentFrameTime < MAX_FPS)
+            Thread.Sleep(millisecondsTimeout: (int)(MAX_FPS - m_currentFrameTime));
     }
 
     /// <summary>

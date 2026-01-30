@@ -10,7 +10,7 @@ namespace Cuity.UI.Components;
 /// </summary>
 /// <typeparam name="T">A <see cref="Entity"/> as child.</typeparam>
 public class Child: IComponent {
-    private const string NAME_OF = "ChildContainer";
+    private const string NAME_OF = "Child";
     private Entity m_child = null!;
 
     /// <summary>

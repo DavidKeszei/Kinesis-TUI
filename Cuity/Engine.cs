@@ -1,5 +1,8 @@
 ﻿using Cuity.Input;
+using Cuity.Navigation;
+using Cuity.Processing;
 using Cuity.Rendering;
+using Cuity.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +18,8 @@ public sealed class Engine {
 
     private readonly WorkerSystem m_worker = null!;
     private readonly List<(ISystem System, SystemInvocation Invocation)> m_customSystems = null!;
+
+    private readonly NavigationSystem m_navigator = null!;
     
     /// <summary>
     /// Create a new <see cref="Engine"/> instance.
@@ -23,8 +28,10 @@ public sealed class Engine {
         m_renderer = new Renderer(x: Console.BufferWidth, y: Console.BufferHeight);
         m_customSystems = new List<(ISystem System, SystemInvocation Invocation)>();
 
-        m_worker = new WorkerSystem(renderer: m_renderer);
-        m_input = new InputSystem(workers: m_worker);
+        m_input = new InputSystem();
+        m_worker = new WorkerSystem();
+
+        m_navigator = new NavigationSystem();
     }
 
     /// <summary>
@@ -36,12 +43,14 @@ public sealed class Engine {
     public void AddSystem<T>(T system, SystemInvocation when) where T: ISystem 
         => m_customSystems.Add(item: (system, when));
 
-#if DEBUG
-
-    public void AddAction(Action<float, InputMessage> action)
-        => m_worker.AddQueueAction(action);
-
-#endif
+    /// <summary>
+    /// Register a named route with a <paramref name="pageCreation"/> method.
+    /// </summary>
+    /// <param name="route">Name of the route.</param>
+    /// <param name="pageCreation">Creation method of the <see cref="Page"/>.</param>
+    /// <returns>Return <see langword="true"/>, if the route is successfully registered. Otherwiese return <see langword="false"/>.</returns>
+    public bool RegisterRoute(string route, Func<Page> pageCreation)
+        => m_navigator.Register(route, pageCreation);
 
     /// <summary>
     /// Start the <see cref="Engine"/> instance with the systems.
@@ -50,13 +59,13 @@ public sealed class Engine {
         /* Run the starter systems. */
         Run(invocation: SystemInvocation.ON_BEGIN);
 
-        /* Start main parts of the engine on different threads. (Input, Workers)*/
-        _ = Task.Run(action: () => m_input.Start(), token);
+        /* Start main parts of the engine on different threads. (Input, Workers) */
         _ = Task.Run(action: () => m_worker.Start(), token);
+        _ = Task.Run(action: () => m_input.Start(), token);
 
         while(!token.IsCancellationRequested) {
             /* Render the frame to the screen/terminal window. */
-            m_renderer.Render(entities: []);
+            m_renderer.Render(entities: m_navigator.Current.UIElements);
         }
 
         /* Run the shutdown systems. */

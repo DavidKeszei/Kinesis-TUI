@@ -65,6 +65,8 @@ public class TextRenderer: RenderComponent {
                 }
             }
         }
+
+        m_entityVersion = version;
     }
 
     protected override void CacheStyles(IEnumerable<IStyleComponent> styles) {
@@ -88,12 +90,14 @@ public class TextRenderer: RenderComponent {
     }
 
     private void SetText(ReadOnlySpan<char> text) {
-        if(m_len < text.Length)
+        if (m_len < text.Length) {
+            m_len = text.Length;
             m_buffer = new char[m_len];
+        }
 
-        for(int i = 0; i < m_len; ++i)
-            m_buffer[i] = text[i];
-
-        m_len = text.Length;
-    }
+        for (int i = 0; i < m_len; ++i) {
+            if (text.Length <= i) m_buffer[i] = '\0';
+            else m_buffer[i] = text[i];
+        }
+    } 
 }

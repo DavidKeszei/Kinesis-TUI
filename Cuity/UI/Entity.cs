@@ -66,14 +66,14 @@ public class Entity: IEnumerable<IComponent> {
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
     public T? GetComponent<T>(int index = 0) where T: class, IComponent {
-        if (m_uniqueComponents.TryGetValue(typeof(T), out int i))
+        if (m_uniqueComponents.TryGetValue(typeof(T), out int i)) {
             return m_components[i] as T;
+        }
 
         int current = 0;
         foreach (IComponent component in m_components) {
-            if (component is T) {
-                if(current++ == index)
-                    return component as T;
+            if (component is T && current++ == index) {
+                return component as T;
             }
         }
 
@@ -99,13 +99,10 @@ public class Entity: IEnumerable<IComponent> {
         int indexOf = 0;
 
         foreach (IComponent component in m_components) {
-            if (component is T) {
-                if (++indexOf == index) {
-
-                    m_components.RemoveAt(index);
-                    ++m_version;
-                    return;
-                }
+            if (component is T && ++indexOf == index) {
+                m_components.RemoveAt(index);
+                ++m_version;
+                return;
             }
         }
     }

@@ -16,7 +16,7 @@ public interface ISystem {
 }
 
 /// <summary>
-/// Indicates, when a <see cref="ISystem"/> instance when runs.
+/// Indicates, when a <see cref="ISystem"/> instance runs.
 /// </summary>
 public enum SystemInvocation: byte {
     ON_BEGIN,
