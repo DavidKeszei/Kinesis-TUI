@@ -32,6 +32,11 @@ internal readonly struct ConsoleBuffer {
     public ConsoleBuffer(int x, int y) {
         m_dimension = (x, y);
         m_buffer = new vt_char[x, y];
+
+        for (int _x = 0; _x < x; ++_x) {
+            for (int _y = 0; _y < y; ++_y)
+                m_buffer[_x, _y] = new vt_char(' ', RGB.Black);
+        }
     }
 
     /// <summary>

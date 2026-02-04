@@ -1,4 +1,6 @@
 ﻿using Cuity.Processing;
+using Cuity.UI;
+using Cuity.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,7 +44,7 @@ public readonly record struct InputMessage {
     /// <param name="key">Actual key value as <see cref="char"/>.</param>
     /// <param name="modifiers">Currently pressed modifiers with the <see cref="Key"/>.</param>
     /// <param name="action">Current action of the message.</param>
-    public InputMessage(char key, InputModifier modifiers, InputAction action) {
+    internal InputMessage(char key, InputModifier modifiers, InputAction action) {
         m_key = key;
         m_modifiers = modifiers;
 
@@ -53,8 +55,8 @@ public readonly record struct InputMessage {
 /// <summary>
 /// Represent a unified source of the inputs.
 /// </summary>
-internal class InputSystem: ISystem {
-    private const string DEDICATED_THREAD_NAME = "THREAD::INPUT";
+internal class InputSystem: IDynamicSystem {
+    private const string DEDICATED_THREAD_NAME = "<Thread> Input";
 
     /// <summary>
     /// Indicates the wait time between two sampling. (5ms)
@@ -71,17 +73,18 @@ internal class InputSystem: ISystem {
     /// </summary>
     private const int HOLD_THRESHHOLD = 75;
 
+    public SystemBehavior Behavior { get => SystemBehavior.DYNAMIC; }
+
     private readonly IInputBackend m_backend = null!;
     private (char Key, InputModifier Modifier, TimeSpan When) m_startInputInfo = ('\0', InputModifier.NONE, TimeSpan.Zero);
 
-    public InputSystem() {
-        m_backend = RuntimeInformation.IsOSPlatform(osPlatform: OSPlatform.Windows) ? WindowsInputBackend.Init() : null!;
-    }
+    public InputSystem() 
+        => m_backend = RuntimeInformation.IsOSPlatform(osPlatform: OSPlatform.Windows) ? WindowsInputBackend.Init() : null!;
 
     /// <summary>
     /// Listen inputs from standard input.
     /// </summary>
-    public void Start() {
+    public void Run() {
         Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
 
         float deadZoneTime = DEAD_ZONE;
@@ -104,13 +107,13 @@ internal class InputSystem: ISystem {
                     if ((now.TimeOfDay - m_startInputInfo.When).TotalMilliseconds >= HOLD_THRESHHOLD && lastAction != InputAction.HOLD) {
 
                         lastAction = InputAction.HOLD;
-                        WorkerSystem.Instance.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.HOLD));
+                        WorkerSystem.Current.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.HOLD));
                     }
                 }
                 else if (m_startInputInfo.Key != character || m_startInputInfo.Modifier != modifiers) {
                     if (m_startInputInfo.When != TimeSpan.Zero) {
 
-                        WorkerSystem.Instance.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
+                        WorkerSystem.Current.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
                         deadZoneTime = DEAD_ZONE;
                     }
 
@@ -124,7 +127,7 @@ internal class InputSystem: ISystem {
 
             if (deadZoneTime <= 0) {
                 if (lastAction != InputAction.HOLD)
-                    WorkerSystem.Instance.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
+                    WorkerSystem.Current.AddInputMessage(message: new InputMessage(key: m_startInputInfo.Key, modifiers: m_startInputInfo.Modifier, action: InputAction.PRESS));
 
                 m_startInputInfo = ('\0', InputModifier.NONE, TimeSpan.Zero);
 

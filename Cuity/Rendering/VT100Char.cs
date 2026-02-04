@@ -7,7 +7,7 @@ namespace Cuity.Rendering;
 /// Represent a VT100 emulated character on the screen.
 /// </summary>
 public struct VT100Char: IEquatable<VT100Char> {
-    private RGB m_bg = RGB.White;
+    private RGB m_bg = RGB.Black;
     private RGB m_fg = RGB.White;
 
     private char m_character = ' ';
@@ -46,6 +46,14 @@ public struct VT100Char: IEquatable<VT100Char> {
         => vt.m_character == m_character && vt.Background.Equals(m_bg) && 
            vt.Foreground.Equals(rgb: m_fg) && 
            vt.m_styles == m_styles;
+
+    public void Clear() {
+        m_bg = RGB.Black;
+        m_fg = RGB.Black;
+
+        m_styles = VT100StyleFlag.NONE;
+        m_character = ' ';
+    }
 }
 
 /// <summary>
@@ -80,6 +88,8 @@ public struct RGB: IEquatable<RGB> {
     }
 
     public RGB(uint color) => m_color = color;
+
+    public static RGB Random() => new RGB((uint)(System.Random.Shared.NextSingle() * 0xFFFFFFFF));
 
     public bool Equals(RGB rgb) 
         => rgb.m_red == m_red && rgb.m_green == m_green && rgb.m_blue == m_blue;

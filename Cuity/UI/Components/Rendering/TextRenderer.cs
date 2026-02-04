@@ -1,6 +1,8 @@
 ﻿using Cuity.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Cuity.UI.Components;
@@ -9,7 +11,7 @@ namespace Cuity.UI.Components;
 /// Represent a text renderer component.
 /// </summary>
 public class TextRenderer: RenderComponent {
-    private const string NAME_OF = "Text";
+    private const string NAME_OF = "TextRenderer";
 
     private char[] m_buffer = null!;
     private int m_len = 0;
@@ -22,7 +24,10 @@ public class TextRenderer: RenderComponent {
     /// <summary>
     /// Current text text of the <see cref="TextRenderer"/>.
     /// </summary>
-    public string Value { get => new string(value: m_buffer.AsSpan()[..m_len]); set => SetText(text: value); }
+    public string Value { 
+        get => new string(value: m_buffer.AsSpan()[..m_len]);
+        set => SetText(text: value);
+    }
 
     public TextRenderer() { }
 
@@ -32,6 +37,9 @@ public class TextRenderer: RenderComponent {
     }
 
     internal override void Render(in Canvas buffer, int version, params IEnumerable<IStyleComponent> styles) {
+        if (buffer.Scale.Y == 0 || buffer.Scale.X == 0)
+            return;
+
         if(m_entityVersion != version)
             CacheStyles(styles);
 
@@ -96,7 +104,7 @@ public class TextRenderer: RenderComponent {
         }
 
         for (int i = 0; i < m_len; ++i) {
-            if (text.Length <= i) m_buffer[i] = '\0';
+            if (text.Length <= i) break;
             else m_buffer[i] = text[i];
         }
     } 

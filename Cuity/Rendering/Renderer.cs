@@ -21,6 +21,7 @@ public class Renderer {
 
     private static float m_currentFrameTime = .0f;
 
+
     /// <summary>
     /// Current scale of the screen.
     /// </summary>
@@ -29,12 +30,12 @@ public class Renderer {
     /// <summary>
     /// Current frame/second value by the engine from the frame time.
     /// </summary>
-    public static float FPS { get => 1000f / m_currentFrameTime; }
+    public float FPS { get => 1000f / m_currentFrameTime; }
 
     /// <summary>
     /// Indicates the elapsed time between two frames. Sometimes call this as "delta-time".
     /// </summary>
-    public static float FrameTime { get => m_currentFrameTime; }
+    public float FrameTime { get => m_currentFrameTime; }
 
     /// <summary>
     /// Create a new <see cref="Renderer"/> instance with specific <paramref name="x"/> and <paramref name="y"/> scale.
@@ -58,17 +59,20 @@ public class Renderer {
     /// Render one frame to the screen.
     /// </summary>
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
-    public void Render(IEnumerable<Entity> entities) {
+    public void Render(IReadOnlyList<Entity> entities) {
         DateTime start = DateTime.Now;
 
-        foreach(Entity entity in entities) {
-            Transform transform = entity.GetComponent<Transform>()!;
-            RenderComponent? renderLogic = entity.GetComponent<RenderComponent>();
+        for(int i = 0; i < entities.Count; ++i) {
+            Transform transform = entities[i].GetComponent<Transform>()!;
+
+            RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
+            ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>();
 
             if(renderLogic != null && renderLogic.IsDirty) {
+                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child != null ? child.Previous : null!);
                 Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
 
-                renderLogic.Render(buffer: in canvas, version: entity.Version, styles: entity.ResolveStyles());
+                renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
                 renderLogic.IsDirty = false;
             }
         }
@@ -93,7 +97,7 @@ public class Renderer {
                 ref vt_char ch = ref m_frontBuffer[x, y];
                 ref vt_char b_ch = ref m_backBuffer[x, y];
 
-                if (!ch.Equals(b_ch)) {
+                if (!ch.Equals(b_ch) || m_currentFrameTime == .0f) {
 
                     written += builder.WritePosition(x, y)
                                       .WriteFontStyles(flags: b_ch.Styles)
@@ -114,5 +118,38 @@ public class Renderer {
 
         m_output.Flush();
         m_frontBuffer.Copy(from: in m_backBuffer);
+    }
+
+    private void Clear(in Canvas canvas, Entity entity) {
+        if (canvas.Scale.X == 0 || canvas.Scale.Y == 0)
+            return;
+
+        RGB bg = GetParentBG(entity);
+
+        for (int x = 0; x < canvas.Scale.X; ++x) {
+            for (int y = 0; y < canvas.Scale.Y; ++y) {
+                ref vt_char px = ref canvas[x, y];
+                px.Clear();
+
+                px.Background = bg;
+            }
+        }
+    }
+
+    private RGB GetParentBG(Entity entity) {
+        RGB rgb = RGB.Black;
+        if (entity == null) return rgb;
+
+        foreach (IStyleComponent style in entity.ResolveStyles()) {
+            if (style.Tag == StyleTag.BACKGROUND)
+                return (style as Style<RGB>)!.Value;
+        }
+
+        ConnectionComponent? child = entity.GetComponent<ConnectionComponent>();
+
+        if (child == null) return RGB.Black;
+        else rgb = GetParentBG(child.Previous);
+
+        return rgb;
     }
 }

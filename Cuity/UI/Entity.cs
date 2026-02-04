@@ -17,11 +17,6 @@ public class Entity: IEnumerable<IComponent> {
     private int m_version = 0;
 
     /// <summary>
-    /// Name of the <see cref="Entity"/> instance.
-    /// </summary>
-    public string Name { get => m_name; }
-
-    /// <summary>
     /// Version of the entity.
     /// </summary>
     internal int Version { get => m_version; set => m_version = value; }
@@ -30,8 +25,7 @@ public class Entity: IEnumerable<IComponent> {
     /// Create a new <see cref="Entity"/> with specific name.
     /// </summary>
     /// <param name="name">Name of the instance.</param>
-    public Entity(string name) {
-        m_name = name;
+    public Entity() {
         m_version = 0;
 
         m_components = new List<IComponent>();
@@ -65,16 +59,14 @@ public class Entity: IEnumerable<IComponent> {
     /// </summary>
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
-    public T? GetComponent<T>(int index = 0) where T: class, IComponent {
-        if (m_uniqueComponents.TryGetValue(typeof(T), out int i)) {
+    public virtual T? GetComponent<T>(int index = 0) where T: class, IComponent {
+        if (m_uniqueComponents.TryGetValue(typeof(T), out int i))
             return m_components[i] as T;
-        }
 
         int current = 0;
         foreach (IComponent component in m_components) {
-            if (component is T && current++ == index) {
+            if (component is T && current++ == index)
                 return component as T;
-            }
         }
 
         return default!;
