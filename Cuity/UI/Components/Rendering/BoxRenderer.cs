@@ -9,12 +9,11 @@ namespace Cuity.UI.Components;
 /// Represent a component, which can drawing a box to the screen.
 /// </summary>
 public class BoxRenderer: RenderComponent {
-    private const string NAME_OF = "BoxRenderer";
 
     /// <summary>
     /// Name of the <see cref="BoxRenderer"/>.
     /// </summary>
-    public override string Name { get => NAME_OF; }
+    public override string Name { get => nameof(RenderComponent); }
 
     /// <summary>
     /// Render a box to the specific <paramref name="buffer"/> area.
@@ -32,14 +31,14 @@ public class BoxRenderer: RenderComponent {
                 ref vt_char ch = ref buffer[x, y];
 
                 /* Source-like visual debug, if the background as visual effect not exists or just wrong type/typo. */
-                if(!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out IStyleComponent? bg) || bg is not Style<RGB>) {
+                if(!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out IStyleComponent? bg) || bg is not Style) {
                     if(y % 2 != 0) ch.Background = x % 2 != 0 ? RGB.Purple : new RGB(r: 0, g: 0, b: 0);
                     else ch.Background = x % 2 == 0 ? RGB.Purple : new RGB(r: 0, g: 0, b: 0);
 
                     ch.Character = ' ';
                 }
                 else {
-                    ch.Background = (bg as Style<RGB>)!.Value;
+                    ch.Background = ((Style)bg).AsRGB;
                     ch.Character = ' ';
                 }
             }

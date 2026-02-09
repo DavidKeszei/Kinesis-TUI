@@ -30,25 +30,25 @@ public class UIText: Entity {
     /// <summary>
     /// Background of the <see cref="UIText"/>.
     /// </summary>
-    public RGB Background { get => base.GetComponent<Style<RGB>>(index: 0)!.Value; set => base.GetComponent<Style<RGB>>(index: 0)!.Value = value; }
+    public RGB Background { get => base.GetComponent<Style>()!.AsRGB; set => base.GetComponent<Style>()!.AsRGB = value; }
 
     /// <summary>
     /// Foreground/Text color of the <see cref="UIText"/>.
     /// </summary>
-    public RGB Foreground { get => base.GetComponent<Style<RGB>>(index: 1)!.Value; set => base.GetComponent<Style<RGB>>(index: 1)!.Value = value; }
+    public RGB Foreground { get => base.GetComponent<Style>(index: 1)!.AsRGB; set => base.GetComponent<Style>(index: 1)!.AsRGB = value; }
 
     /// <summary>
     /// Style indicators of the <see cref="UIText"/>.
     /// </summary>
-    public VT100StyleFlag Attributes { get => base.GetComponent<Style<VT100StyleFlag>>()!.Value; set => base.GetComponent<Style<VT100StyleFlag>>()!.Value = value; }
+    public VT100StyleFlag Attributes { get => base.GetComponent<Style>(2)!.AsAttribute; set => base.GetComponent<Style>(2)!.AsAttribute = value; }
 
     public UIText() {
         base.AttachComponent<Transform>(new Transform() { Scale = (X: 0, Y: 1) }, isUnique: true);
         base.AttachComponent<TextRenderer>(component: new TextRenderer(), isUnique: true);
 
-        base.AttachComponent<Style<RGB>>(component: new Style<RGB>(tag: StyleTag.BACKGROUND, value: RGB.Black));
-        base.AttachComponent<Style<RGB>>(component: new Style<RGB>(tag: StyleTag.FOREGROUND, value: RGB.White));
+        base.AttachComponent<Style>(component: Style.CreateFromRGB(tag: StyleTag.BACKGROUND, color: RGB.Black));
+        base.AttachComponent<Style>(component: Style.CreateFromRGB(tag: StyleTag.FOREGROUND, color: RGB.White));
 
-        base.AttachComponent<Style<VT100StyleFlag>>(component: new Style<VT100StyleFlag>(tag: StyleTag.FONT_ATTR, value: VT100StyleFlag.NONE), isUnique: true);
+        base.AttachComponent<Style>(component: Style.CreateFromAttributes(tag: StyleTag.FONT_ATTR, flag: VT100StyleFlag.NONE));
     }
 }

@@ -33,10 +33,7 @@ public abstract class RenderComponent: IComponent {
     protected RenderComponent() 
         => m_cache = new Dictionary<StyleTag, IStyleComponent>();
 
-    /// <summary>
-    /// Propagate changes on the <see cref="RenderComponent"/>.
-    /// </summary>
-    public void UpdateChanges() => m_isDirty = true;
+    public void UpdateComponent() => m_isDirty = true;
 
     /// <summary>
     /// Render the component to the screen.

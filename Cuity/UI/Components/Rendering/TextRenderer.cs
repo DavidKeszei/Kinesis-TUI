@@ -11,15 +11,13 @@ namespace Cuity.UI.Components;
 /// Represent a text renderer component.
 /// </summary>
 public class TextRenderer: RenderComponent {
-    private const string NAME_OF = "TextRenderer";
-
     private char[] m_buffer = null!;
     private int m_len = 0;
 
     /// <summary>
     /// Name of the <see cref="TextRenderer"/>.
     /// </summary>
-    public override string Name { get => NAME_OF; }
+    public override string Name { get => nameof(RenderComponent); }
 
     /// <summary>
     /// Current text text of the <see cref="TextRenderer"/>.
@@ -47,8 +45,8 @@ public class TextRenderer: RenderComponent {
         IStyleComponent? fg = null!;
         IStyleComponent? attr = null!;
 
-        bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && bg is not Style<RGB>) ||
-                         (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && fg is not Style<RGB>);
+        bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && bg is not Style) ||
+                         (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && fg is not Style);
 
         _ = m_cache.TryGetValue(key: StyleTag.FONT_ATTR, out attr);
         (int X, int Y) requiredScale = (X: m_len / buffer.Scale.Y, Y: m_len % buffer.Scale.Y);
@@ -66,10 +64,12 @@ public class TextRenderer: RenderComponent {
                 }
                 else {
                     ch.Character = m_buffer[x];
-                    ch.Background = (bg as Style<RGB>)!.Value;
+                    ch.Background = ((Style)bg!).AsRGB;
 
-                    ch.Foreground = (fg as Style<RGB>)!.Value;
-                    ch.Styles = (attr as Style<VT100StyleFlag> ?? new Style<VT100StyleFlag>(tag: StyleTag.FONT_ATTR, value: VT100StyleFlag.NONE)).Value;
+                    ch.Foreground = ((Style)fg!).AsRGB;
+
+                    if (attr == null) ch.Styles = VT100StyleFlag.NONE;
+                    else ch.Styles = ((Style)attr).AsAttribute;
                 }
             }
         }
@@ -107,5 +107,7 @@ public class TextRenderer: RenderComponent {
             if (text.Length <= i) break;
             else m_buffer[i] = text[i];
         }
+
+        UpdateComponent();
     } 
 }

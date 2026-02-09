@@ -9,7 +9,6 @@ namespace Cuity.UI.Components;
 /// Represent a component, which can hold a <typeparamref name="T"/> instance.
 /// </summary>
 public class ConnectionComponent: IComponent {
-    private const string NAME_OF = "ConnectionComponent";
     private Entity m_child = null!;
 
     private Entity m_parent = null!;
@@ -17,7 +16,7 @@ public class ConnectionComponent: IComponent {
     /// <summary>
     /// Name of the component.
     /// </summary>
-    public string Name { get => NAME_OF; }
+    public string Name { get => nameof(ConnectionComponent); }
 
     /// <summary>
     /// Next <see cref="Entity"/> instance from this <see cref="Entity"/>.

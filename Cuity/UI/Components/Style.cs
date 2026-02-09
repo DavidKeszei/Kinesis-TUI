@@ -1,6 +1,8 @@
 ﻿using Cuity.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Cuity.UI.Components;
@@ -8,29 +10,116 @@ namespace Cuity.UI.Components;
 /// <summary>
 /// Represent a style container component.
 /// </summary>
-public class Style<T>: IStyleComponent {
-    private const string NAME_OF = "Style";
-
-    private T m_value = default!;
-    private StyleTag m_tagging = StyleTag.BACKGROUND;
-
-    public string Name { get => NAME_OF; }
+public class Style: IStyleComponent {
+    private StyleGenericUnion m_union = default;
 
     /// <summary>
-    /// Stored color of the <see cref="Style{T}"/> as <typeparamref name="T"/>.
+    /// Name of the <see cref="Style"/> component.
     /// </summary>
-    public T Value { get => m_value; set => m_value = value; }
+    public string Name { get => "Style"; }
 
     /// <summary>
-    /// Tagging of the <see cref="Style{T}"/>, which indicates what kind of style property is.
+    /// Tagging of the <see cref="Style"/>, which indicates what kind of style property is.
     /// </summary>
-    public StyleTag Tag { get => m_tagging; set => m_tagging = value; }
+    public StyleTag Tag { get => m_union.Tag; }
 
-    public Style() { }
+    /// <summary>
+    /// Interact the underlying value as <see cref="int"/>.
+    /// </summary>
+    public int AsInt { get => m_union.GetInteger(); set => m_union.SetInteger(value); }
 
-    public Style(StyleTag tag, T value) {
-        m_value = value;
-        m_tagging = tag;
+    /// <summary>
+    /// Interact the underlying value as <see cref="RGB"/>.
+    /// </summary>
+    public RGB AsRGB { get => m_union.GetRGB(); set => m_union.SetRGB(value); }
+
+    /// <summary>
+    /// Interact the underlying value as <see cref="VT100StyleFlag"/>.
+    /// </summary>
+    public VT100StyleFlag AsAttribute { get => m_union.GetVT100Attr();  set => m_union.SetVT100Attr(value); }
+
+    private Style(StyleTag tag, RGB color) {
+        m_union = new StyleGenericUnion(tag);
+        m_union.SetRGB(color);
+    }
+
+    private Style(StyleTag tag, int value) {
+        m_union = new StyleGenericUnion(tag);
+        m_union.SetInteger(value);
+    }
+
+    private Style(StyleTag tag, VT100StyleFlag flag) {
+        m_union = new StyleGenericUnion(tag);
+        m_union.SetVT100Attr(flag);
+    }
+
+    public static Style CreateFromRGB(StyleTag tag, RGB color) => new Style(tag, color);
+
+    public static Style CreateFromInt(StyleTag tag, int value) => new Style(tag, value);
+
+    public static Style CreateFromAttributes(StyleTag tag, VT100StyleFlag flag) => new Style(tag, flag);
+}
+
+[StructLayout(LayoutKind.Explicit)]
+internal struct StyleGenericUnion {
+    [FieldOffset(0)] private int m_integer = 0;
+    [FieldOffset(0)] private float m_floating = .0f;
+
+    [FieldOffset(0)] private VT100StyleFlag m_flag = VT100StyleFlag.NONE;
+    [FieldOffset(0)] private RGB m_color = RGB.Black;
+
+    [FieldOffset(8)] private readonly StyleTag m_tag = StyleTag.BACKGROUND;
+
+    /// <summary>
+    /// Delimiter tag of the <see cref="StyleGenericUnion"/>.
+    /// </summary>
+    public readonly StyleTag Tag { get => m_tag; }
+
+    /// <summary>
+    /// Create a new <see cref="StyleGenericUnion"/>.
+    /// </summary>
+    /// <param name="tag">Tag of the <see cref="StyleGenericUnion"/> instance.</param>
+    public StyleGenericUnion(StyleTag tag) => m_tag = tag;
+
+    public void SetInteger(int value) {
+        if (m_tag == StyleTag.BORDER_WIDTH)
+            m_integer = value;
+    }
+
+    public void SetVT100Attr(VT100StyleFlag value) {
+        if (m_tag == StyleTag.FONT_ATTR)
+            m_flag = value;
+    }
+
+    public void SetRGB(RGB value) {
+        switch (m_tag) {
+            case StyleTag.FOREGROUND:
+            case StyleTag.BACKGROUND:
+            case StyleTag.BORDER_COLOR:
+                m_color = value;
+                break;
+        }
+    }
+
+    public int GetInteger() {
+        if (m_tag == StyleTag.BORDER_WIDTH)
+            return m_integer;
+
+        return -1;
+    }
+
+    public VT100StyleFlag GetVT100Attr() {
+        return m_tag switch {
+            StyleTag.FONT_ATTR => m_flag,
+            _ => VT100StyleFlag.NONE
+        };
+    }
+
+    public RGB GetRGB() {
+        return m_tag switch {
+            StyleTag.FOREGROUND or StyleTag.BACKGROUND or StyleTag.BORDER_COLOR => m_color,
+            _ => RGB.Black,
+        };
     }
 }
 

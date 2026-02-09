@@ -8,8 +8,8 @@ namespace Cuity.Processing;
 
 [StructLayout(layoutKind: LayoutKind.Explicit)]
 internal readonly struct WorkMessage {
-    [FieldOffset(0)] private readonly InputMessage m_input = default;
-    [FieldOffset(0)] private readonly RenderMessage m_renderMessage = default;
+    [FieldOffset(0)] private readonly InputMessage m_input = default!;
+    [FieldOffset(0)] private readonly RenderMessage m_renderMessage = default!;
 
     [FieldOffset(8)] private readonly WorkMessageSource m_source = WorkMessageSource.INPUT;
 

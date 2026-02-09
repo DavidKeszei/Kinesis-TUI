@@ -23,7 +23,7 @@ public readonly record struct InputMessage {
     /// <summary>
     /// Represent a empty <see cref="InputMessage"/>.
     /// </summary>
-    public static InputMessage Empty { get => new InputMessage(); }
+    public static InputMessage Empty { get => new InputMessage('\0', InputModifier.NONE, InputAction.PRESS); }
 
     /// <summary>
     /// Target key of the input.

@@ -16,10 +16,22 @@ public class Entity: IEnumerable<IComponent> {
     private readonly string m_name = string.Empty;
     private int m_version = 0;
 
+    private EntityState m_state = EntityState.FREE;
+
     /// <summary>
     /// Version of the entity.
     /// </summary>
     internal int Version { get => m_version; set => m_version = value; }
+
+    /// <summary>
+    /// Name of the entity.
+    /// </summary>
+    public string Name { get => m_name; init => m_name = value; }
+
+    /// <summary>
+    /// Indicates the <see cref="Entity"/> is lock state by the <see cref="Renderer"/>.
+    /// </summary>
+    internal EntityState State { get => m_state; set => m_state = value; }
 
     /// <summary>
     /// Create a new <see cref="Entity"/> with specific name.

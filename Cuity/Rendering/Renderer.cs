@@ -11,7 +11,7 @@ namespace Cuity.Rendering;
 /// </summary>
 public class Renderer {
     private const int MAX_STACK_BUFFER_LEN = 16_384;
-    private const float MAX_FPS = 16.6f;
+    private const float MAX_FPS = 8.3f;
 
     private ConsoleBuffer m_frontBuffer = default!;
     private ConsoleBuffer m_backBuffer = default!;
@@ -20,7 +20,6 @@ public class Renderer {
     private (int X, int Y) m_scale = (0, 0);
 
     private static float m_currentFrameTime = .0f;
-
 
     /// <summary>
     /// Current scale of the screen.
@@ -68,12 +67,15 @@ public class Renderer {
             RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
             ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>();
 
-            if(renderLogic != null && renderLogic.IsDirty) {
-                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child != null ? child.Previous : null!);
-                Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
+            if(entities[i].State == EntityState.LOCKED && renderLogic != null && renderLogic.IsDirty) {
+
+                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, Transform.Toi32(transform.OldPosition), Transform.Toi32(transform.OldScale)), child != null ? child.Previous : null!);
+                Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, Transform.Toi32(transform.Position), Transform.Toi32(transform.Scale));
 
                 renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
                 renderLogic.IsDirty = false;
+
+                entities[i].State = EntityState.FREE;
             }
         }
 
@@ -121,9 +123,6 @@ public class Renderer {
     }
 
     private void Clear(in Canvas canvas, Entity entity) {
-        if (canvas.Scale.X == 0 || canvas.Scale.Y == 0)
-            return;
-
         RGB bg = GetParentBG(entity);
 
         for (int x = 0; x < canvas.Scale.X; ++x) {
@@ -142,7 +141,7 @@ public class Renderer {
 
         foreach (IStyleComponent style in entity.ResolveStyles()) {
             if (style.Tag == StyleTag.BACKGROUND)
-                return (style as Style<RGB>)!.Value;
+                return ((Style)style).AsRGB;
         }
 
         ConnectionComponent? child = entity.GetComponent<ConnectionComponent>();

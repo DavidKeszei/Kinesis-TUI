@@ -17,6 +17,12 @@ public abstract class Page {
     /// </summary>
     internal IReadOnlyList<Entity> Tree { get => m_renderSet; }
 
+    /// <summary>
+    /// Implicit conversion between <see cref="Page"/> and <see cref="Entity"/>.
+    /// </summary>
+    /// <param name="page"></param>
+    public static implicit operator Entity(Page page) => page.Build()!;
+
     public Page()
         => m_renderSet = new List<Entity>(capacity: 32);
 
@@ -34,7 +40,7 @@ public abstract class Page {
         entity ??= Build();
 
         m_renderSet.Add(entity!);
-        int childrenCount = entity!.Count(static x => x.Name == "ConnectionComponent");
+        int childrenCount = entity!.Count(static x => x.Name == nameof(ConnectionComponent));
 
         for (int i = 0; i < childrenCount; ++i) {
             ConnectionComponent child = entity!.GetComponent<ConnectionComponent>(i)!;

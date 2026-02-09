@@ -80,7 +80,7 @@ public sealed class Engine: ISystemProvider {
         while(!token.IsCancellationRequested) {
             /* Render the frame to the screen/terminal window. */
             m_renderer.Render(entities: m_navigator.Current?.Tree ?? []);
-            m_worker.AddRenderMessage(new RenderMessage(m_renderer.FrameTime, (int)m_renderer.FPS));
+            m_worker.AddRenderMessage(new RenderMessage(m_renderer.FrameTime, (int)m_renderer.FPS, m_renderer.Scale));
         }
 
         /* Run the shutdown systems. */

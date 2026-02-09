@@ -1,11 +1,19 @@
 ﻿using Cuity.Input;
 using Cuity.Rendering;
+using Cuity.UI;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Cuity.Processing;
+
+/// <summary>
+/// Represent smallest unit of work.
+/// </summary>
+/// <param name="Action">Callback of the work.</param>
+/// <param name="Target">The target itself.</param>
+internal record WorkTarget(Delegate Action, Entity Target);
 
 /// <summary>
 /// Represent a bunch of workers for different tasks.
@@ -15,7 +23,7 @@ internal class WorkerSystem: IDynamicSystem {
     private static WorkerSystem m_instance = null!;
 
     private readonly ConcurrentQueue<WorkMessage> m_workMessages = null!;
-    private readonly ConcurrentQueue<Delegate> m_targets = null!;
+    private readonly ConcurrentQueue<WorkTarget> m_targets = null!;
 
     /// <summary>
     /// Indicates behavior of the <see cref="WorkerSystem"/>.
@@ -28,7 +36,7 @@ internal class WorkerSystem: IDynamicSystem {
     public static WorkerSystem Current { get => m_instance ??= new WorkerSystem(); }
 
     public WorkerSystem() {
-        m_targets = new ConcurrentQueue<Delegate>();
+        m_targets = new ConcurrentQueue<WorkTarget>();
         m_workMessages = new ConcurrentQueue<WorkMessage>();
     }
     
@@ -48,13 +56,7 @@ internal class WorkerSystem: IDynamicSystem {
     /// Add <paramref name="work"/> to the queue.
     /// </summary>
     /// <param name="work">Current work item.</param>
-    public void AddInputCallback(Action<InputMessage> work) => m_targets.Enqueue(work);
-
-    /// <summary>
-    /// Add <paramref name="work"/> to the queue.
-    /// </summary>
-    /// <param name="work">Current work item.</param>
-    public void AddRenderCallback(Action<RenderMessage> work) => m_targets.Enqueue(work);
+    public void AddCallback<T>(Action<T> work, Entity target) => m_targets.Enqueue(new WorkTarget(work, target));
 
     public void Run() {
         Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
@@ -65,16 +67,17 @@ internal class WorkerSystem: IDynamicSystem {
                 continue;
             }
 
-            foreach (Delegate work in m_targets) {
+            foreach (WorkTarget tuple in m_targets) {
                 switch (message.Source) {
                     case WorkMessageSource.INPUT:
-                        if(work is Action<InputMessage> onInput)
+
+                        if(tuple.Action is Action<InputMessage> onInput)
                             onInput(message.Input);
 
                         break;
 
                     case WorkMessageSource.RENDERING:
-                        if (work is Action<RenderMessage> onRender)
+                        if (tuple.Target.State != EntityState.LOCKED && tuple.Action is Action<RenderMessage> onRender)
                             onRender(message.Render);
 
                         break;
