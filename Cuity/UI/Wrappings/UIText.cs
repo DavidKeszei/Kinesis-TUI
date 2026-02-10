@@ -40,7 +40,7 @@ public class UIText: Entity {
     /// <summary>
     /// Style indicators of the <see cref="UIText"/>.
     /// </summary>
-    public VT100StyleFlag Attributes { get => base.GetComponent<Style>(2)!.AsAttribute; set => base.GetComponent<Style>(2)!.AsAttribute = value; }
+    public StyleFlag Attributes { get => base.GetComponent<Style>(2)!.AsAttribute; set => base.GetComponent<Style>(2)!.AsAttribute = value; }
 
     public UIText() {
         base.AttachComponent<Transform>(new Transform() { Scale = (X: 0, Y: 1) }, isUnique: true);
@@ -49,6 +49,6 @@ public class UIText: Entity {
         base.AttachComponent<Style>(component: Style.CreateFromRGB(tag: StyleTag.BACKGROUND, color: RGB.Black));
         base.AttachComponent<Style>(component: Style.CreateFromRGB(tag: StyleTag.FOREGROUND, color: RGB.White));
 
-        base.AttachComponent<Style>(component: Style.CreateFromAttributes(tag: StyleTag.FONT_ATTR, flag: VT100StyleFlag.NONE));
+        base.AttachComponent<Style>(component: Style.CreateFromAttributes(tag: StyleTag.FONT_ATTR, flag: StyleFlag.NONE));
     }
 }

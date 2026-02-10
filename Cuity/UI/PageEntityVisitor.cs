@@ -11,10 +11,14 @@ namespace Cuity.UI;
 public readonly ref struct PageEntityVisitor {
     private readonly Entity? m_pivot = null!;
 
-    internal PageEntityVisitor(Entity? pivot) {
-        m_pivot = pivot;
-    }
+    internal PageEntityVisitor(Entity? pivot) => m_pivot = pivot;
 
+    /// <summary>
+    /// Visit a specific <typeparamref name="T"/> entity in the tree.
+    /// </summary>
+    /// <typeparam name="T">Type of the entity.</typeparam>
+    /// <param name="name">Unique name of the entity.</param>
+    /// <returns>Return a entity as <typeparamref name="T"/>. If not in the tree, then return <see langword="null"/>.</returns>
     public T? Visit<T>(string name) where T: Entity {
         if (string.IsNullOrEmpty(name) || m_pivot == null) return null!;
         else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T) return m_pivot as T;

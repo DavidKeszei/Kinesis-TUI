@@ -74,9 +74,12 @@ public class Renderer {
 
                 renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
                 renderLogic.IsDirty = false;
-
-                entities[i].State = EntityState.FREE;
+                
+                /* Under the hood, the Transform component always update the old & new position. (Current -> Old; New -> Current) */
+                transform.Scale = transform.Scale;
             }
+
+            entities[i].State = EntityState.FREE;
         }
 
         Diffing();

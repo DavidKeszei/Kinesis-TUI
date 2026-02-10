@@ -1,5 +1,4 @@
-﻿using Cuity.Input;
-using Cuity.Processing;
+﻿using Cuity.Processing;
 using Cuity.Rendering;
 using Cuity.UI.Components;
 using System;
@@ -12,19 +11,20 @@ namespace Cuity.UI;
 /// Interacts, when input was happened on the standard IO. 
 /// </summary>
 /// <typeparam name="T">Type of the child.</typeparam>
-public class OnInputUpdate<T>: Entity where T: Entity {
+public class OnRenderUpdate<T> : Entity where T : Entity {
 
     /// <summary>
     /// Callback, when the input was happened.
     /// </summary>
-    public Action<InputMessage, PageEntityVisitor> On {
+    public Action<RenderMessage, PageEntityVisitor> On {
         set {
             InteractionComponent? interaction = base.GetComponent<InteractionComponent>();
 
             if (interaction == null) {
                 Entity? child = base.GetComponent<ConnectionComponent>()?.Next;
 
-                interaction = new InteractionComponent(onInput: (message) => {
+                interaction = new InteractionComponent(onRender: (message) => {
+                    child = base.GetComponent<ConnectionComponent>()?.Next;
                     RenderComponent? render = child?.GetComponent<RenderComponent>();
 
                     value(message, new PageEntityVisitor(this));
@@ -55,6 +55,6 @@ public class OnInputUpdate<T>: Entity where T: Entity {
         }
     }
 
-    public OnInputUpdate() 
+    public OnRenderUpdate()
         => base.AttachComponent<ConnectionComponent>(new ConnectionComponent(), isUnique: true);
 }

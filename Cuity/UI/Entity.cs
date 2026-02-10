@@ -16,7 +16,7 @@ public class Entity: IEnumerable<IComponent> {
     private readonly string m_name = string.Empty;
     private int m_version = 0;
 
-    private EntityState m_state = EntityState.FREE;
+    private EntityState m_state = EntityState.LOCKED;
 
     /// <summary>
     /// Version of the entity.

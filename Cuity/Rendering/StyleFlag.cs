@@ -8,7 +8,7 @@ namespace Cuity.Rendering;
 /// Enumeration of supported character styles.
 /// </summary>
 [Flags]
-public enum VT100StyleFlag: short {
+public enum StyleFlag: short {
     NONE = (1 << 0),
     /// <summary>
     /// Indicates the character is bold.

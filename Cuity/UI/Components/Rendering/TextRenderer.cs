@@ -68,7 +68,7 @@ public class TextRenderer: RenderComponent {
 
                     ch.Foreground = ((Style)fg!).AsRGB;
 
-                    if (attr == null) ch.Styles = VT100StyleFlag.NONE;
+                    if (attr == null) ch.Styles = StyleFlag.NONE;
                     else ch.Styles = ((Style)attr).AsAttribute;
                 }
             }
@@ -108,6 +108,7 @@ public class TextRenderer: RenderComponent {
             else m_buffer[i] = text[i];
         }
 
+        m_len = text.Length;
         UpdateComponent();
     } 
 }

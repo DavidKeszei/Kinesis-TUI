@@ -78,38 +78,38 @@ internal ref struct VT100StringBuilder {
         return this;
     }
 
-    public VT100StringBuilder WriteFontStyles(VT100StyleFlag flags) {
-        if(flags == VT100StyleFlag.NONE || flags == 0) return this;
+    public VT100StringBuilder WriteFontStyles(StyleFlag flags) {
+        if(flags == StyleFlag.NONE || flags == 0) return this;
 
         /* Static stack allocated flags, which give us information about the supported flags. */
-        Span<VT100StyleFlag> supportedFlags = stackalloc VT100StyleFlag[] {
-            VT100StyleFlag.BOLD, VT100StyleFlag.ITALIC, VT100StyleFlag.UNDERLINE,
-            VT100StyleFlag.BLINK_SLOW, VT100StyleFlag.BLINK_FAST, VT100StyleFlag.INVERSE,
+        Span<StyleFlag> supportedFlags = stackalloc StyleFlag[] {
+            StyleFlag.BOLD, StyleFlag.ITALIC, StyleFlag.UNDERLINE,
+            StyleFlag.BLINK_SLOW, StyleFlag.BLINK_FAST, StyleFlag.INVERSE,
 
-            VT100StyleFlag.HIDDEN, VT100StyleFlag.STROKE_THROUGH, VT100StyleFlag.DOUBLE_UNDERLINE,
-            VT100StyleFlag.OVERLINE
+            StyleFlag.HIDDEN, StyleFlag.STROKE_THROUGH, StyleFlag.DOUBLE_UNDERLINE,
+            StyleFlag.OVERLINE
         };
 
         ESC.CopyTo(destination: m_stack[m_position..]);
         m_position += ESC.Length;
 
-        foreach(VT100StyleFlag flag in supportedFlags) {
+        foreach(StyleFlag flag in supportedFlags) {
             if((flags & flag) == flag) {
                 int code = flag switch {
-                    VT100StyleFlag.BOLD => 1,
-                    VT100StyleFlag.ITALIC => 3,
+                    StyleFlag.BOLD => 1,
+                    StyleFlag.ITALIC => 3,
 
-                    VT100StyleFlag.UNDERLINE => 4,
-                    VT100StyleFlag.BLINK_SLOW => 5,
+                    StyleFlag.UNDERLINE => 4,
+                    StyleFlag.BLINK_SLOW => 5,
 
-                    VT100StyleFlag.BLINK_FAST => 6,
-                    VT100StyleFlag.INVERSE => 7,
+                    StyleFlag.BLINK_FAST => 6,
+                    StyleFlag.INVERSE => 7,
 
-                    VT100StyleFlag.HIDDEN => 8,
-                    VT100StyleFlag.STROKE_THROUGH => 9,
+                    StyleFlag.HIDDEN => 8,
+                    StyleFlag.STROKE_THROUGH => 9,
 
-                    VT100StyleFlag.DOUBLE_UNDERLINE => 21,
-                    VT100StyleFlag.OVERLINE => 53,
+                    StyleFlag.DOUBLE_UNDERLINE => 21,
+                    StyleFlag.OVERLINE => 53,
 
                     _ => 0
                 };

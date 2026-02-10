@@ -16,7 +16,7 @@ public class Style: IStyleComponent {
     /// <summary>
     /// Name of the <see cref="Style"/> component.
     /// </summary>
-    public string Name { get => "Style"; }
+    public string Name { get => nameof(Style); }
 
     /// <summary>
     /// Tagging of the <see cref="Style"/>, which indicates what kind of style property is.
@@ -34,9 +34,9 @@ public class Style: IStyleComponent {
     public RGB AsRGB { get => m_union.GetRGB(); set => m_union.SetRGB(value); }
 
     /// <summary>
-    /// Interact the underlying value as <see cref="VT100StyleFlag"/>.
+    /// Interact the underlying value as <see cref="StyleFlag"/>.
     /// </summary>
-    public VT100StyleFlag AsAttribute { get => m_union.GetVT100Attr();  set => m_union.SetVT100Attr(value); }
+    public StyleFlag AsAttribute { get => m_union.GetVT100Attr();  set => m_union.SetVT100Attr(value); }
 
     private Style(StyleTag tag, RGB color) {
         m_union = new StyleGenericUnion(tag);
@@ -48,24 +48,45 @@ public class Style: IStyleComponent {
         m_union.SetInteger(value);
     }
 
-    private Style(StyleTag tag, VT100StyleFlag flag) {
+    private Style(StyleTag tag, StyleFlag flag) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetVT100Attr(flag);
     }
 
+    /// <summary>
+    /// Create a new <see cref="Style"/> with <see cref="RGB"/> value.
+    /// </summary>
+    /// <param name="tag">Tag of the style.</param>
+    /// <param name="color">The color value itself.</param>
+    /// <returns>Return a <see cref="Style"/> instance.</returns>
     public static Style CreateFromRGB(StyleTag tag, RGB color) => new Style(tag, color);
 
+    /// <summary>
+    /// Create a new <see cref="Style"/> with <see cref="RGB"/> value.
+    /// </summary>
+    /// <param name="tag">Tag of the style.</param>
+    /// <param name="value">The color value itself.</param>
+    /// <returns>Return a <see cref="Style"/> instance.</returns>
     public static Style CreateFromInt(StyleTag tag, int value) => new Style(tag, value);
 
-    public static Style CreateFromAttributes(StyleTag tag, VT100StyleFlag flag) => new Style(tag, flag);
+    /// <summary>
+    /// Create a new <see cref="Style"/> with <see cref="StyleFlag"/> value.
+    /// </summary>
+    /// <param name="tag">Tag of the style.</param>
+    /// <param name="flag">The color value itself.</param>
+    /// <returns>Return a <see cref="Style"/> instance.</returns>
+    public static Style CreateFromAttributes(StyleTag tag, StyleFlag flag) => new Style(tag, flag);
 }
 
+/// <summary>
+/// Simple union for store <see cref="Style"/> values without generic.
+/// </summary>
 [StructLayout(LayoutKind.Explicit)]
 internal struct StyleGenericUnion {
     [FieldOffset(0)] private int m_integer = 0;
     [FieldOffset(0)] private float m_floating = .0f;
 
-    [FieldOffset(0)] private VT100StyleFlag m_flag = VT100StyleFlag.NONE;
+    [FieldOffset(0)] private StyleFlag m_flag = StyleFlag.NONE;
     [FieldOffset(0)] private RGB m_color = RGB.Black;
 
     [FieldOffset(8)] private readonly StyleTag m_tag = StyleTag.BACKGROUND;
@@ -86,7 +107,7 @@ internal struct StyleGenericUnion {
             m_integer = value;
     }
 
-    public void SetVT100Attr(VT100StyleFlag value) {
+    public void SetVT100Attr(StyleFlag value) {
         if (m_tag == StyleTag.FONT_ATTR)
             m_flag = value;
     }
@@ -108,10 +129,10 @@ internal struct StyleGenericUnion {
         return -1;
     }
 
-    public VT100StyleFlag GetVT100Attr() {
+    public StyleFlag GetVT100Attr() {
         return m_tag switch {
             StyleTag.FONT_ATTR => m_flag,
-            _ => VT100StyleFlag.NONE
+            _ => StyleFlag.NONE
         };
     }
 

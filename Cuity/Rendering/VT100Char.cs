@@ -11,7 +11,7 @@ public struct VT100Char: IEquatable<VT100Char> {
     private RGB m_fg = RGB.White;
 
     private char m_character = ' ';
-    private VT100StyleFlag m_styles = VT100StyleFlag.NONE;
+    private StyleFlag m_styles = StyleFlag.NONE;
 
     /// <summary>
     /// Character of the current buffer.
@@ -31,7 +31,7 @@ public struct VT100Char: IEquatable<VT100Char> {
     /// <summary>
     /// Applied font styles to the character.
     /// </summary>
-    public VT100StyleFlag Styles { get => m_styles; set => m_styles = value; }
+    public StyleFlag Styles { get => m_styles; set => m_styles = value; }
 
     public static bool operator ==(VT100Char l, VT100Char r) => l.Equals(r);
 
@@ -51,7 +51,7 @@ public struct VT100Char: IEquatable<VT100Char> {
         m_bg = RGB.Black;
         m_fg = RGB.Black;
 
-        m_styles = VT100StyleFlag.NONE;
+        m_styles = StyleFlag.NONE;
         m_character = ' ';
     }
 }
@@ -75,6 +75,12 @@ public struct RGB: IEquatable<RGB> {
 
     public static RGB Purple { get => new RGB(r: 128, g: 0, b: 128); }
 
+    public static RGB Yellow { get => new RGB(r: 255, g: 255, b: 0); }
+
+    public static RGB Green { get => new RGB(r: 0, g: 255, b: 0); }
+
+    public static RGB Red { get => new RGB(r: 255, g: 0, b: 0); }
+
     public byte R { readonly get => m_red; set => m_red = value; }
 
     public byte G { readonly get => m_green; set => m_green = value; }
@@ -89,8 +95,27 @@ public struct RGB: IEquatable<RGB> {
 
     public RGB(uint color) => m_color = color;
 
+    /// <summary>
+    /// Generate random <see cref="RGB"/> value.
+    /// </summary>
+    /// <returns>Return a <see cref="RGB"/> value.</returns>
     public static RGB Random() => new RGB((uint)(System.Random.Shared.NextSingle() * 0xFFFFFFFF));
 
-    public bool Equals(RGB rgb) 
+    /// <summary>
+    /// Interpolate between to <see cref="RGB"/> values.
+    /// </summary>
+    /// <param name="left">Start value of the interpolation.</param>
+    /// <param name="right">End of value of the interpolation.</param>
+    /// <param name="time">Interpolation between the two <see cref="RGB"/> values.</param>
+    /// <returns>Return a new <see cref="RGB"/> between <paramref name="left"/> and <paramref name="right"/> based on the <paramref name="time"/>.</returns>
+    public static RGB Lerp(RGB left, RGB right, float time) {
+        float r = left.R + (right.R - left.R) * time;
+        float g = left.G + (right.G - left.G) * time;
+        float b = left.B + (right.B - left.B) * time;
+
+        return new RGB((byte)r, (byte)g, (byte)b);
+    }
+
+    public readonly bool Equals(RGB rgb) 
         => rgb.m_red == m_red && rgb.m_green == m_green && rgb.m_blue == m_blue;
 }
