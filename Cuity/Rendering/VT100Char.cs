@@ -1,4 +1,4 @@
-﻿global using vt_char = Cuity.Rendering.VT100Char;
+﻿global using vtchar_t = Cuity.Rendering.VT100Char;
 using System.Runtime.InteropServices;
 
 namespace Cuity.Rendering; 
@@ -6,7 +6,7 @@ namespace Cuity.Rendering;
 /// <summary>
 /// Represent a VT100 emulated character on the screen.
 /// </summary>
-public struct VT100Char: IEquatable<VT100Char> {
+public struct VT100Char: IEquatable<vtchar_t> {
     private RGB m_bg = RGB.Black;
     private RGB m_fg = RGB.White;
 
@@ -42,13 +42,13 @@ public struct VT100Char: IEquatable<VT100Char> {
         m_bg = color;
     }
 
-    public readonly bool Equals(VT100Char vt) 
+    public readonly bool Equals(vtchar_t vt) 
         => vt.m_character == m_character && vt.Background.Equals(m_bg) && 
            vt.Foreground.Equals(rgb: m_fg) && 
            vt.m_styles == m_styles;
 
     public void Clear() {
-        m_bg = RGB.Black;
+        m_bg = RGB.INVALID;
         m_fg = RGB.Black;
 
         m_styles = StyleFlag.NONE;
@@ -80,6 +80,11 @@ public struct RGB: IEquatable<RGB> {
     public static RGB Green { get => new RGB(r: 0, g: 255, b: 0); }
 
     public static RGB Red { get => new RGB(r: 255, g: 0, b: 0); }
+
+    /// <summary>
+    /// Represent a invalid value as <see cref="RGB"/>.
+    /// </summary>
+    public static RGB INVALID { get => new RGB(color: 0xFFFFFFFF); }
 
     public byte R { readonly get => m_red; set => m_red = value; }
 
@@ -115,6 +120,13 @@ public struct RGB: IEquatable<RGB> {
 
         return new RGB((byte)r, (byte)g, (byte)b);
     }
+
+    /// <summary>
+    /// Check if the <paramref name="color"/> is invalid <see cref="RGB"/> value.
+    /// </summary>
+    /// <param name="color">The value itself.</param>
+    /// <returns>Return <see langword="true"/> if the <paramref name="color"/> is invalid. Otherwise return <see langword="false"/>.</returns>
+    public static bool IsInvalid(RGB color) => color.Equals(rgb: RGB.INVALID);
 
     public readonly bool Equals(RGB rgb) 
         => rgb.m_red == m_red && rgb.m_green == m_green && rgb.m_blue == m_blue;

@@ -16,6 +16,8 @@ internal ref struct VT100StringBuilder {
     private const string ESC_BG = "\x1b[48;2;";
     private const string ESC_FG = "\x1b[38;2;";
 
+    private const string ESC_BG_DEFAULT = "\x1b[49m";
+
     /// <summary>
     /// Maximum length of the command, which contains all of the commands.
     /// </summary>
@@ -58,6 +60,11 @@ internal ref struct VT100StringBuilder {
     /// <param name="isBackground">The color is background color or not?</param>
     /// <returns>Return the current <see cref="VT100StringBuilder"/> instance.</returns>
     public VT100StringBuilder WriteColor(RGB color, bool isBackground) {
+        if (RGB.IsInvalid(color) && isBackground) {
+            ESC_BG_DEFAULT.TryCopyTo(destination: m_stack[m_position..]);
+            return this;
+        }
+
         m_stack[m_position++] = '\x1b';
         (isBackground ? ESC_BG : ESC_FG).CopyTo(m_stack[m_position..]);
 

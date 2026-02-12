@@ -11,7 +11,7 @@ namespace Cuity.Rendering;
 /// </summary>
 public class Renderer {
     private const int MAX_STACK_BUFFER_LEN = 16_384;
-    private const float MAX_FPS = 8.3f;
+    private const float MAX_FPS = 16.6f;
 
     private ConsoleBuffer m_frontBuffer = default!;
     private ConsoleBuffer m_backBuffer = default!;
@@ -75,8 +75,11 @@ public class Renderer {
                 renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
                 renderLogic.IsDirty = false;
                 
-                /* Under the hood, the Transform component always update the old & new position. (Current -> Old; New -> Current) */
-                transform.Scale = transform.Scale;
+                /* 
+                 * Under the hood, the Transform component always update the old & new position, scale. (Current -> Old; New -> Current)
+                 * Other reason why I put this, because this updating old info of Transform component, which makes the rendering good. (Or idk, *sparkle* MAGIC *sparkle*)
+                 */
+                transform.Scale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
             }
 
             entities[i].State = EntityState.FREE;
@@ -99,10 +102,10 @@ public class Renderer {
         for (int x = 0; x < m_scale.X; ++x) {
             for (int y = 0; y < m_scale.Y; ++y) {
 
-                ref vt_char ch = ref m_frontBuffer[x, y];
-                ref vt_char b_ch = ref m_backBuffer[x, y];
+                ref vtchar_t ch = ref m_frontBuffer[x, y];
+                ref vtchar_t b_ch = ref m_backBuffer[x, y];
 
-                if (!ch.Equals(b_ch) || m_currentFrameTime == .0f) {
+                if (!ch.Equals(b_ch)) {
 
                     written += builder.WritePosition(x, y)
                                       .WriteFontStyles(flags: b_ch.Styles)
@@ -126,11 +129,14 @@ public class Renderer {
     }
 
     private void Clear(in Canvas canvas, Entity entity) {
+        if (canvas.Scale.X == 0 || canvas.Scale.Y == 0)
+            return;
+
         RGB bg = GetParentBG(entity);
 
         for (int x = 0; x < canvas.Scale.X; ++x) {
             for (int y = 0; y < canvas.Scale.Y; ++y) {
-                ref vt_char px = ref canvas[x, y];
+                ref vtchar_t px = ref canvas[x, y];
                 px.Clear();
 
                 px.Background = bg;
@@ -139,7 +145,7 @@ public class Renderer {
     }
 
     private RGB GetParentBG(Entity entity) {
-        RGB rgb = RGB.Black;
+        RGB rgb = RGB.INVALID;
         if (entity == null) return rgb;
 
         foreach (IStyleComponent style in entity.ResolveStyles()) {
@@ -149,7 +155,7 @@ public class Renderer {
 
         ConnectionComponent? child = entity.GetComponent<ConnectionComponent>();
 
-        if (child == null) return RGB.Black;
+        if (child == null) return RGB.INVALID;
         else rgb = GetParentBG(child.Previous);
 
         return rgb;

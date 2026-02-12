@@ -14,12 +14,12 @@ public readonly ref struct Canvas {
     private readonly (int X, int Y) m_position = (0, 0);
 
     /// <summary>
-    /// Get a <see cref="VT100Char"/> reference from the canvas.
+    /// Get a <see cref="vtchar_t"/> reference from the canvas.
     /// </summary>
     /// <param name="x">X coordinate of the reference on the screen.</param>
     /// <param name="y">Y coordinate of the reference on the screen.</param>
-    /// <returns>Return a <see cref="VT100Char"/> reference.</returns>
-    public ref vt_char this[int x, int y] { get => ref m_buffer[m_position.X + x, m_position.Y + y]; }
+    /// <returns>Return a <see cref="vtchar_t"/> reference.</returns>
+    public ref vtchar_t this[int x, int y] { get => ref m_buffer[m_position.X + x, m_position.Y + y]; }
 
     /// <summary>
     /// Scale of the <see cref="Canvas"/>.

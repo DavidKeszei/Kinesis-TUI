@@ -8,7 +8,7 @@ namespace Cuity.Rendering;
 /// Represent a <see cref="ConsoleBuffer"/> on the screen.
 /// </summary>
 internal readonly struct ConsoleBuffer {
-    private readonly vt_char[,] m_buffer = null!;
+    private readonly vtchar_t[,] m_buffer = null!;
     private readonly (int X, int Y) m_dimension = (-1, -1);
 
     /// <summary>
@@ -22,7 +22,7 @@ internal readonly struct ConsoleBuffer {
     /// <param name="x">X position of the reference.</param>
     /// <param name="y">Y position of the reference.</param>
     /// <returns>Return a <see cref="vt_char"/> reference.</returns>
-    public ref vt_char this[int x, int y] => ref m_buffer[x, y];
+    public ref vtchar_t this[int x, int y] => ref m_buffer[x, y];
 
     /// <summary>
     /// Create new <see cref="ConsoleBuffer"/> with specific dimension.
@@ -31,11 +31,11 @@ internal readonly struct ConsoleBuffer {
     /// <param name="y">Height of the from.</param>
     public ConsoleBuffer(int x, int y) {
         m_dimension = (x, y);
-        m_buffer = new vt_char[x, y];
+        m_buffer = new vtchar_t[x, y];
 
         for (int _x = 0; _x < x; ++_x) {
             for (int _y = 0; _y < y; ++_y)
-                m_buffer[_x, _y] = new vt_char(' ', RGB.Black);
+                m_buffer[_x, _y] = new vtchar_t(' ', RGB.INVALID);
         }
     }
 
