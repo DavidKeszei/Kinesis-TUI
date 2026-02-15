@@ -9,7 +9,9 @@ namespace Cuity.Rendering;
 /// <summary>
 /// Represent a helper component in the rendering.
 /// </summary>
-public abstract class RenderComponent: IComponent {
+public abstract class RenderComponent: IComponent, IStaticType {
+    private const string TYPE_NAME = "RenderComponent";
+
     protected readonly Dictionary<StyleTag, IStyleComponent> m_cache = null!;
 
     protected int m_entityVersion = 0;
@@ -18,7 +20,7 @@ public abstract class RenderComponent: IComponent {
     /// <summary>
     /// Name of the <see cref="RenderComponent"/>.
     /// </summary>
-    public abstract string Name { get; }
+    public static string Name { get => TYPE_NAME; }
 
     /// <summary>
     /// Version of the entity, which target of the <see cref="RenderComponent"/>.
@@ -47,4 +49,6 @@ public abstract class RenderComponent: IComponent {
     /// </summary>
     /// <param name="styles">Non-filtered <see cref="IStyleComponent"/>s.</param>
     protected abstract void CacheStyles(IEnumerable<IStyleComponent> styles);
+
+    public bool IsType(string type) => TYPE_NAME == type;
 }

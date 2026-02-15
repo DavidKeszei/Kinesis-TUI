@@ -15,11 +15,6 @@ public class TextRenderer: RenderComponent {
     private int m_len = 0;
 
     /// <summary>
-    /// Name of the <see cref="TextRenderer"/>.
-    /// </summary>
-    public override string Name { get => nameof(RenderComponent); }
-
-    /// <summary>
     /// Current text text of the <see cref="TextRenderer"/>.
     /// </summary>
     public string Value { 
@@ -45,11 +40,11 @@ public class TextRenderer: RenderComponent {
         IStyleComponent? fg = null!;
         IStyleComponent? attr = null!;
 
-        bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && bg is not Style) ||
-                         (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && fg is not Style);
+        bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && !bg!.IsType(Style.Name)) ||
+                         (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && !fg!.IsType(Style.Name));
 
         _ = m_cache.TryGetValue(key: StyleTag.FONT_ATTR, out attr);
-        (int X, int Y) requiredScale = (X: m_len / buffer.Scale.Y, Y: m_len % buffer.Scale.Y);
+        Vec2 requiredScale = new Vec2(x: m_len / buffer.Scale.Y, y: m_len % buffer.Scale.Y);
 
         for(int x = 0; x < buffer.Scale.X && x <= requiredScale.X; ++x) {
             for(int y = 0; y < buffer.Scale.Y && y <= requiredScale.Y; ++y) {

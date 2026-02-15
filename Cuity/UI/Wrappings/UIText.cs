@@ -23,7 +23,7 @@ public class UIText: Entity {
                 return;
 
             base.GetComponent<TextRenderer>()!.Value = value;
-            base.GetComponent<Transform>()!.Scale = (X: value.Length, Y: 1);
+            base.GetComponent<Transform>()!.Scale = new Vec2(x: value.Length, y: 1);
         }
     }
 
@@ -43,7 +43,7 @@ public class UIText: Entity {
     public StyleFlag Attributes { get => base.GetComponent<Style>(2)!.AsAttribute; set => base.GetComponent<Style>(2)!.AsAttribute = value; }
 
     public UIText() {
-        base.AttachComponent<Transform>(new Transform() { Scale = (X: 0, Y: 1) }, isUnique: true);
+        base.AttachComponent<Transform>(new Transform() { Scale = new Vec2(x: 0, y: 1) }, isUnique: true);
         base.AttachComponent<TextRenderer>(component: new TextRenderer(), isUnique: true);
 
         base.AttachComponent<Style>(component: Style.CreateFromRGB(tag: StyleTag.BACKGROUND, color: RGB.Black));

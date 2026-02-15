@@ -10,13 +10,14 @@ namespace Cuity.UI.Components;
 /// <summary>
 /// Represent a style container component.
 /// </summary>
-public class Style: IStyleComponent {
+public class Style: IStyleComponent, IStaticType {
+    private const string TYPE_NAME = "Style";
     private StyleGenericUnion m_union = default;
 
     /// <summary>
     /// Name of the <see cref="Style"/> component.
     /// </summary>
-    public string Name { get => nameof(Style); }
+    public static string Name { get => TYPE_NAME; }
 
     /// <summary>
     /// Tagging of the <see cref="Style"/>, which indicates what kind of style property is.
@@ -76,6 +77,8 @@ public class Style: IStyleComponent {
     /// <param name="flag">The color value itself.</param>
     /// <returns>Return a <see cref="Style"/> instance.</returns>
     public static Style CreateFromAttributes(StyleTag tag, StyleFlag flag) => new Style(tag, flag);
+
+    public bool IsType(string type) => TYPE_NAME == type;
 }
 
 /// <summary>

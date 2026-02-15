@@ -26,13 +26,14 @@ public sealed class Engine: ISystemProvider {
     /// Create a new <see cref="Engine"/> instance.
     /// </summary>
     public Engine() {
-        m_renderer = new Renderer(x: Console.BufferWidth, y: Console.BufferHeight);
+        m_renderer = new Renderer(scale: new Vec2(x: Console.BufferWidth, y: Console.BufferHeight));
         m_input = new InputSystem();
 
         m_worker = WorkerSystem.Current;
         m_navigator = new NavigationSystem(provider: this);
 
         m_customSystems = new List<SystemInvocationInfo>();
+        RegisterBuiltInComponents();
     }
 
     public T? GetSystem<T>() where T: class, ISystem {
@@ -48,6 +49,9 @@ public sealed class Engine: ISystemProvider {
 
         return default!;
     }
+
+    public bool RegisterComponent<T>() where T: class, IComponent, IStaticType
+        => ComponentTypeProvider.RegisterComponent<T>(name: T.Name);
 
     /// <summary>
     /// Add a system to the engine.
@@ -100,5 +104,16 @@ public sealed class Engine: ISystemProvider {
             if (system.Behavior == SystemBehavior.DYNAMIC && systemInfo.System is IDynamicSystem dynamic)
                 dynamic.Run();
         }
+    }
+
+    private void RegisterBuiltInComponents() {
+        this.RegisterComponent<BoxRenderer>();
+        this.RegisterComponent<TextRenderer>();
+
+        this.RegisterComponent<Transform>();
+        this.RegisterComponent<ConnectionComponent>();
+
+        this.RegisterComponent<Style>();
+        this.RegisterComponent<InteractionComponent>();
     }
 }

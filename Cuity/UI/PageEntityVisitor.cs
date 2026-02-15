@@ -24,13 +24,13 @@ public readonly ref struct PageEntityVisitor {
         else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T) return m_pivot as T;
 
         Entity? result = RecursiveVisit(current: m_pivot, name);
-        return result is T ? result as T : null!;
+        return (T?)result;
     }
 
     private Entity? RecursiveVisit(Entity? current, string name) {
         if (current == null) return null!;
 
-        int childrenCount = current.Count(static x => x is ConnectionComponent);
+        int childrenCount = CountOfChild(current);
         for (int i = 0; i < childrenCount; ++i) {
             Entity? child = current.GetComponent<ConnectionComponent>(i)?.Next;
 
@@ -49,5 +49,19 @@ public readonly ref struct PageEntityVisitor {
                 return false;
 
         return true;
+    }
+
+    private int CountOfChild(Entity entity) {
+        if(entity == null)
+            return 0;
+
+        int count = 0;
+
+        foreach (IComponent component in entity) {
+            if (component.IsType(ConnectionComponent.Name))
+                ++count;
+        }
+
+        return count;
     }
 }

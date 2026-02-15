@@ -40,11 +40,24 @@ public abstract class Page {
         entity ??= Build();
 
         m_renderSet.Add(entity!);
-        int childrenCount = entity!.Count(static x => x.Name == nameof(ConnectionComponent));
+        int childrenCount = CountOfChild(entity);
 
         for (int i = 0; i < childrenCount; ++i) {
             ConnectionComponent child = entity!.GetComponent<ConnectionComponent>(i)!;
             CreateRenderSet(entity: child.Next);
         }
+    }
+
+    private int CountOfChild(Entity? entity) {
+        if (entity == null)
+            return 0;
+
+        int count = 0;
+        foreach (IComponent component in entity) {
+            if (component.IsType(nameof(ConnectionComponent)))
+                ++count;
+        }
+
+        return count;
     }
 }

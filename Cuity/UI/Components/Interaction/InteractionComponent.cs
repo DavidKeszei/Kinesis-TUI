@@ -9,10 +9,10 @@ namespace Cuity.UI.Components;
 /// <summary>
 /// Represent a interactive component on an <see cref="Entity"/>.
 /// </summary>
-public class InteractionComponent: IComponent {
-    private const string NAME_OF = "Interaction";
+public class InteractionComponent: IComponent, IStaticType {
+    private const string TYPE_NAME = "Interaction";
 
-    public string Name { get => nameof(InteractionComponent); }
+    public static string Name { get => TYPE_NAME; }
 
     /// <summary>
     /// Create a new <see cref="InteractionComponent"/>, which fires every input.
@@ -27,4 +27,6 @@ public class InteractionComponent: IComponent {
     /// <param name="onRender">Callback for the end of the frame.</param>
     public InteractionComponent(Action<RenderMessage> onRender, Entity target)
         => WorkerSystem.Current.AddCallback(work: onRender, target);
+
+    public bool IsType(string type) => TYPE_NAME == type;
 }

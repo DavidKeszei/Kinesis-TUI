@@ -10,7 +10,9 @@ namespace Cuity.UI;
 public interface IComponent {
 
     /// <summary>
-    /// Name of the component.
+    /// Check if the component static type name is equal with <paramref name="type"/>.
     /// </summary>
-    public string Name { get; }
+    /// <param name="type">Type name of the component.</param>
+    /// <returns>Return <see langword="true"/>, if the <paramref name="type"/> is equal with the underlying name. Otherwise return <see langword="false"/>.</returns>
+    public bool IsType(string type);
 }

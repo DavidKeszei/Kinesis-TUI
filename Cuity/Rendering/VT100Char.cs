@@ -48,7 +48,7 @@ public struct VT100Char: IEquatable<vtchar_t> {
            vt.m_styles == m_styles;
 
     public void Clear() {
-        m_bg = RGB.INVALID;
+        m_bg = RGB.Transparent;
         m_fg = RGB.Black;
 
         m_styles = StyleFlag.NONE;
@@ -67,6 +67,8 @@ public struct RGB: IEquatable<RGB> {
     [FieldOffset(1)] private byte m_green = 0x0;
     [FieldOffset(2)] private byte m_blue = 0x0;
 
+    [FieldOffset(3)] private byte m_alpha = 0x0;
+
     public static implicit operator RGB(uint color) => new RGB(color);
 
     public static RGB White { get => new RGB(r: 255, g: 255, b: 255); }
@@ -84,18 +86,22 @@ public struct RGB: IEquatable<RGB> {
     /// <summary>
     /// Represent a invalid value as <see cref="RGB"/>.
     /// </summary>
-    public static RGB INVALID { get => new RGB(color: 0xFFFFFFFF); }
+    public static RGB Transparent { get => new RGB(color: 0xFFFFFFFF); }
 
     public byte R { readonly get => m_red; set => m_red = value; }
 
     public byte G { readonly get => m_green; set => m_green = value; }
 
     public byte B { readonly get => m_blue; set => m_blue = value; }
+
+    public byte A { readonly get => m_alpha; set => m_alpha = value; }
          
-    public RGB(byte r, byte g, byte b) {
+    public RGB(byte r, byte g, byte b, byte a = 255) {
         m_red = r;
         m_green = g;
+
         m_blue = b;
+        m_alpha = a;
     }
 
     public RGB(uint color) => m_color = color;
@@ -116,18 +122,13 @@ public struct RGB: IEquatable<RGB> {
     public static RGB Lerp(RGB left, RGB right, float time) {
         float r = left.R + (right.R - left.R) * time;
         float g = left.G + (right.G - left.G) * time;
-        float b = left.B + (right.B - left.B) * time;
 
-        return new RGB((byte)r, (byte)g, (byte)b);
+        float b = left.B + (right.B - left.B) * time;
+        float a = left.A + (right.A - left.A) * time;
+
+        return new RGB((byte)r, (byte)g, (byte)b, (byte)a);
     }
 
-    /// <summary>
-    /// Check if the <paramref name="color"/> is invalid <see cref="RGB"/> value.
-    /// </summary>
-    /// <param name="color">The value itself.</param>
-    /// <returns>Return <see langword="true"/> if the <paramref name="color"/> is invalid. Otherwise return <see langword="false"/>.</returns>
-    public static bool IsInvalid(RGB color) => color.Equals(rgb: RGB.INVALID);
-
     public readonly bool Equals(RGB rgb) 
-        => rgb.m_red == m_red && rgb.m_green == m_green && rgb.m_blue == m_blue;
+        => rgb.m_red == m_red && rgb.m_green == m_green && rgb.m_blue == m_blue && m_alpha == rgb.m_alpha;
 }

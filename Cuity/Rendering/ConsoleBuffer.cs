@@ -35,7 +35,7 @@ internal readonly struct ConsoleBuffer {
 
         for (int _x = 0; _x < x; ++_x) {
             for (int _y = 0; _y < y; ++_y)
-                m_buffer[_x, _y] = new vtchar_t(' ', RGB.INVALID);
+                m_buffer[_x, _y] = new vtchar_t(' ', RGB.Transparent);
         }
     }
 
@@ -58,15 +58,15 @@ internal readonly struct ConsoleBuffer {
     /// <param name="from">Absolute index of the from.</param>
     /// <param name="scale">Scale of the from.</param>
     /// <returns>Return a <see cref="Canvas"/> instance.</returns>
-    public static Canvas Slice(ref ConsoleBuffer buffer, (int X, int Y) from, (int X, int Y) scale) {
+    public static Canvas Slice(ref ConsoleBuffer buffer, Vec2 from, Vec2 scale) {
         if (from.X < 0) scale.X += from.X;
         else if (from.X + scale.X >= buffer.Dimension.X) scale.X -= (from.X + scale.X) % buffer.Dimension.X;
 
         if (from.Y < 0) scale.Y += from.Y;
         else if (from.Y + scale.Y >= buffer.Dimension.Y) scale.Y -= (from.Y + scale.Y) % buffer.Dimension.Y;
 
-        from.X = int.Clamp(from.X, 0, buffer.Dimension.X - 1);
-        from.Y = int.Clamp(from.Y, 0, buffer.Dimension.Y - 1);
+        from.X = float.Clamp(from.X, 0, buffer.Dimension.X - 1);
+        from.Y = float.Clamp(from.Y, 0, buffer.Dimension.Y - 1);
 
         return new Canvas(ref buffer, scale, from);
     }

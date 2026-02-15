@@ -1,4 +1,5 @@
 ﻿using Cuity.Rendering;
+using Cuity.UI.Components;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ namespace Cuity.UI;
 /// <summary>
 /// Represent a plain, tagged instance of the library.
 /// </summary>
-public class Entity: IEnumerable<IComponent> {
+public class Entity {
     private readonly List<IComponent> m_components = null!;
-    private readonly Dictionary<Type, int> m_uniqueComponents = null!;
+    private readonly Dictionary<int, int> m_uniqueComponents = null!;
 
     private readonly string m_name = string.Empty;
     private int m_version = 0;
@@ -41,7 +42,7 @@ public class Entity: IEnumerable<IComponent> {
         m_version = 0;
 
         m_components = new List<IComponent>();
-        m_uniqueComponents = new Dictionary<Type, int>();
+        m_uniqueComponents = new Dictionary<int, int>();
     }
 
     /// <summary>
@@ -51,12 +52,10 @@ public class Entity: IEnumerable<IComponent> {
     /// <param name="component">Pre-defined value of the component. If this <see langword="null"/>, then the system creates a default component.</param>
     /// <param name="isUnique">Indicates the component is unique on the <see cref="Entity"/>.</param>
     /// <returns>Return <see langword="true"/> if the component is added to the entity. Otherwise return <see langword="false"/>.</returns>
-    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent {
-        if (component == null)
-            return false;
-
-        if(isUnique || component is RenderComponent) {
-            if(!m_uniqueComponents.TryAdd(component is RenderComponent ? typeof(RenderComponent) : typeof(T), m_components.Count))
+    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, IStaticType {
+        if (component == null) return false;
+        if(isUnique || component.IsType(RenderComponent.Name)) {
+            if(!m_uniqueComponents.TryAdd(ComponentTypeProvider.QueryComponent(T.Name), m_components.Count))
                 return false;
         }
 
@@ -71,13 +70,13 @@ public class Entity: IEnumerable<IComponent> {
     /// </summary>
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
-    public virtual T? GetComponent<T>(int index = 0) where T: class, IComponent {
-        if (m_uniqueComponents.TryGetValue(typeof(T), out int i))
-            return m_components[i] as T;
+    public virtual T? GetComponent<T>(int index = 0) where T: class, IComponent, IStaticType {
+        if (m_uniqueComponents.TryGetValue(ComponentTypeProvider.QueryComponent(T.Name), out int i))
+            return (T)m_components[i];
 
         int current = 0;
         foreach (IComponent component in m_components) {
-            if (component is T && current++ == index)
+            if (component.IsType(T.Name) && current++ == index)
                 return component as T;
         }
 
@@ -89,12 +88,10 @@ public class Entity: IEnumerable<IComponent> {
     /// </summary>
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <param name="index">Indicates where we want delete the component.</param>
-    public void RemoveComponent<T>(int index = 0) where T: class, IComponent {
-        if (m_uniqueComponents.TryGetValue(typeof(T), out int i)) {
-            IComponent component = m_components[i];
-
+    public void RemoveComponent<T>(int index = 0) where T: class, IComponent, IStaticType {
+        if (m_uniqueComponents.TryGetValue(key: ComponentTypeProvider.QueryComponent(T.Name), out int i)) {
             m_components.RemoveAt(i);
-            m_uniqueComponents.Remove(component is RenderComponent ? typeof(RenderComponent) : typeof(T));
+            m_uniqueComponents.Remove(key: ComponentTypeProvider.QueryComponent(name: T.Name));
 
             ++m_version;
             return;
@@ -103,7 +100,7 @@ public class Entity: IEnumerable<IComponent> {
         int indexOf = 0;
 
         foreach (IComponent component in m_components) {
-            if (component is T && ++indexOf == index) {
+            if (component.IsType(T.Name) && ++indexOf == index) {
                 m_components.RemoveAt(index);
                 ++m_version;
                 return;
@@ -117,17 +114,30 @@ public class Entity: IEnumerable<IComponent> {
     /// <returns>Return a <see cref="IEnumerable{T}"/> instance.</returns>
     internal IEnumerable<IStyleComponent> ResolveStyles() {
         foreach(IComponent component in m_components) {
-            if(component is IStyleComponent)
-                yield return (component as IStyleComponent)!;
+            if(component.IsType(type: Style.Name))
+                yield return ((Style)component);
         }
     }
 
-    public IEnumerator<IComponent> GetEnumerator() {
-        foreach (IComponent component in m_components)
-            yield return component;
-    }
+    public ComponentIterator GetEnumerator() => new ComponentIterator(components: m_components);
+}
 
-    IEnumerator IEnumerable.GetEnumerator() {
-        return GetEnumerator();
+/// <summary>
+/// Ref-like iterator for <see cref="IComponent"/> instances.
+/// </summary>
+public ref struct ComponentIterator {
+    private List<IComponent> m_components = null!;
+    private int m_current = -1;
+
+    public IComponent Current { get => m_components[m_current]; }
+
+    public ComponentIterator(List<IComponent> components)
+        => m_components = components;
+
+    public bool MoveNext() {
+        if (++m_current < m_components.Count)
+            return true;
+
+        return false;
     }
 }

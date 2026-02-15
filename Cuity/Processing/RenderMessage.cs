@@ -8,15 +8,15 @@ public readonly record struct RenderMessage {
     private readonly float m_delta = .0f;
     private readonly int m_fps = 0;
 
-    private readonly (int X, int Y) m_scale = (0, 0);
+    private readonly Vec2 m_scale = Vec2.Zero;
 
     public float DeltaTime { get => m_delta; }
 
     public int FPS { get => m_fps; }
 
-    public (int X, int Y) Scale { get => m_scale; }
+    public Vec2 Scale { get => m_scale; }
 
-    internal RenderMessage(float deltaTime, int fps, (int X, int Y) scale) {
+    internal RenderMessage(float deltaTime, int fps, Vec2 scale) {
         m_delta = deltaTime;
         m_fps = fps;
 

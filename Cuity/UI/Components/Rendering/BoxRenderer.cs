@@ -11,11 +11,6 @@ namespace Cuity.UI.Components;
 public class BoxRenderer: RenderComponent {
 
     /// <summary>
-    /// Name of the <see cref="BoxRenderer"/>.
-    /// </summary>
-    public override string Name { get => nameof(RenderComponent); }
-
-    /// <summary>
     /// Render a box to the specific <paramref name="buffer"/> area.
     /// </summary>
     /// <param name="buffer">Target buffer of the rendering. This can be smaller, than the requested scale.</param>

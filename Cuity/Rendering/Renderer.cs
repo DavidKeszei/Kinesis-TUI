@@ -11,20 +11,20 @@ namespace Cuity.Rendering;
 /// </summary>
 public class Renderer {
     private const int MAX_STACK_BUFFER_LEN = 16_384;
-    private const float MAX_FPS = 16.6f;
+    private const float MAX_FPS = 8.3f;
 
     private ConsoleBuffer m_frontBuffer = default!;
     private ConsoleBuffer m_backBuffer = default!;
 
     private StreamWriter m_output = null!;
-    private (int X, int Y) m_scale = (0, 0);
+    private Vec2 m_scale = Vec2.Zero;
 
     private static float m_currentFrameTime = .0f;
 
     /// <summary>
     /// Current scale of the screen.
     /// </summary>
-    public (int X, int Y) Scale { get => m_scale; }
+    public Vec2 Scale { get => m_scale; }
 
     /// <summary>
     /// Current frame/second value by the engine from the frame time.
@@ -41,11 +41,11 @@ public class Renderer {
     /// </summary>
     /// <param name="x">Width of the renderer.</param>
     /// <param name="y">Height of the renderer.</param>
-    public Renderer(int x, int y) {
-        m_frontBuffer = new ConsoleBuffer(x, y);
-        m_backBuffer = new ConsoleBuffer(x, y);
+    public Renderer(Vec2 scale) {
+        m_frontBuffer = new ConsoleBuffer((int)scale.X, (int)scale.Y);
+        m_backBuffer = new ConsoleBuffer((int)scale.X, (int)scale.Y);
 
-        m_scale = (x, y);
+        m_scale = scale;
         m_output = new StreamWriter(stream: Console.OpenStandardOutput());
 
         m_output.AutoFlush = false;
@@ -69,8 +69,8 @@ public class Renderer {
 
             if(entities[i].State == EntityState.LOCKED && renderLogic != null && renderLogic.IsDirty) {
 
-                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, Transform.Toi32(transform.OldPosition), Transform.Toi32(transform.OldScale)), child != null ? child.Previous : null!);
-                Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, Transform.Toi32(transform.Position), Transform.Toi32(transform.Scale));
+                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child != null ? child.Previous : null!);
+                Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
 
                 renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
                 renderLogic.IsDirty = false;
@@ -145,7 +145,7 @@ public class Renderer {
     }
 
     private RGB GetParentBG(Entity entity) {
-        RGB rgb = RGB.INVALID;
+        RGB rgb = RGB.Transparent;
         if (entity == null) return rgb;
 
         foreach (IStyleComponent style in entity.ResolveStyles()) {
@@ -155,7 +155,7 @@ public class Renderer {
 
         ConnectionComponent? child = entity.GetComponent<ConnectionComponent>();
 
-        if (child == null) return RGB.INVALID;
+        if (child == null) return RGB.Transparent;
         else rgb = GetParentBG(child.Previous);
 
         return rgb;

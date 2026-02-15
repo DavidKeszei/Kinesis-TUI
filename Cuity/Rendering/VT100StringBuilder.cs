@@ -26,6 +26,9 @@ internal ref struct VT100StringBuilder {
     private readonly Span<char> m_stack = default!;
     private int m_position = 0;
 
+    private RGB m_background = RGB.Transparent;
+    private RGB m_foreground = RGB.Transparent;
+
     public VT100StringBuilder(Span<char> buffer) => m_stack = buffer;
 
     /// <summary>
@@ -60,10 +63,8 @@ internal ref struct VT100StringBuilder {
     /// <param name="isBackground">The color is background color or not?</param>
     /// <returns>Return the current <see cref="VT100StringBuilder"/> instance.</returns>
     public VT100StringBuilder WriteColor(RGB color, bool isBackground) {
-        if (RGB.IsInvalid(color) && isBackground) {
-            ESC_BG_DEFAULT.TryCopyTo(destination: m_stack[m_position..]);
+        if ((m_background.Equals(rgb: color) && isBackground) || (m_foreground.Equals(rgb: color) && !isBackground))
             return this;
-        }
 
         m_stack[m_position++] = '\x1b';
         (isBackground ? ESC_BG : ESC_FG).CopyTo(m_stack[m_position..]);
@@ -81,6 +82,9 @@ internal ref struct VT100StringBuilder {
         color.B.TryFormat(m_stack[m_position..], out written);
         m_position += written;
         m_stack[m_position++] = 'm';
+
+        if (isBackground) m_background = color;
+        else m_foreground = color;
 
         return this;
     }
