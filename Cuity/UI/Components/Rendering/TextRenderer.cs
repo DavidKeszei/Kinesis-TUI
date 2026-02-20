@@ -40,8 +40,8 @@ public class TextRenderer: RenderComponent {
         IStyleComponent? fg = null!;
         IStyleComponent? attr = null!;
 
-        bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && !bg!.IsType(Style.Name)) ||
-                         (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && !fg!.IsType(Style.Name));
+        bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && !bg!.TypeOf(Style.Name)) ||
+                         (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && !fg!.TypeOf(Style.Name));
 
         _ = m_cache.TryGetValue(key: StyleTag.FONT_ATTR, out attr);
         Vec2 requiredScale = new Vec2(x: m_len / buffer.Scale.Y, y: m_len % buffer.Scale.Y);

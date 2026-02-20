@@ -12,8 +12,8 @@ namespace Cuity.Processing;
 /// Represent smallest unit of work.
 /// </summary>
 /// <param name="Action">Callback of the work.</param>
-/// <param name="Target">The target itself.</param>
-internal record WorkTarget(Delegate Action, Entity Target);
+/// <param name="Context">The target itself.</param>
+internal record WorkTarget(Delegate Action, EntityChangeContext Context);
 
 /// <summary>
 /// Represent a bunch of workers for different tasks.
@@ -56,7 +56,8 @@ internal class WorkerSystem: IDynamicSystem {
     /// Add <paramref name="work"/> to the queue.
     /// </summary>
     /// <param name="work">Current work item.</param>
-    public void AddCallback<T>(Action<T> work, Entity target) => m_targets.Enqueue(new WorkTarget(work, target));
+    /// <param name="context">Holds the changed entities.</param>
+    public void AddCallback<T>(Action<T> work, EntityChangeContext context) => m_targets.Enqueue(new WorkTarget(work, context));
 
     public void Run() {
         Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
@@ -77,7 +78,7 @@ internal class WorkerSystem: IDynamicSystem {
                         break;
 
                     case WorkMessageSource.RENDERING:
-                        if (tuple.Target.State != EntityState.LOCKED && tuple.Action is Action<RenderMessage> onRender)
+                        if (!tuple.Context.IsLocked() && tuple.Action is Action<RenderMessage> onRender)
                             onRender(message.Render);
 
                         break;

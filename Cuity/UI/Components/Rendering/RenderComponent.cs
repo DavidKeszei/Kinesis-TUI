@@ -50,5 +50,5 @@ public abstract class RenderComponent: IComponent, IStaticType {
     /// <param name="styles">Non-filtered <see cref="IStyleComponent"/>s.</param>
     protected abstract void CacheStyles(IEnumerable<IStyleComponent> styles);
 
-    public bool IsType(string type) => TYPE_NAME == type;
+    public bool TypeOf(string type) => TYPE_NAME == type;
 }

@@ -18,15 +18,15 @@ public class InteractionComponent: IComponent, IStaticType {
     /// Create a new <see cref="InteractionComponent"/>, which fires every input.
     /// </summary>
     /// <param name="onInput">Callback for the inputs.</param>
-    public InteractionComponent(Action<InputMessage> onInput, Entity target) 
-        => WorkerSystem.Current.AddCallback(work: onInput, target);
+    public InteractionComponent(Action<InputMessage> onInput, EntityChangeContext context) 
+        => WorkerSystem.Current.AddCallback(work: onInput, context);
 
     /// <summary>
     /// Create a new <see cref="InteractionComponent"/>, which fires every render frame ends.
     /// </summary>
     /// <param name="onRender">Callback for the end of the frame.</param>
-    public InteractionComponent(Action<RenderMessage> onRender, Entity target)
-        => WorkerSystem.Current.AddCallback(work: onRender, target);
+    public InteractionComponent(Action<RenderMessage> onRender, EntityChangeContext context)
+        => WorkerSystem.Current.AddCallback(work: onRender, context);
 
-    public bool IsType(string type) => TYPE_NAME == type;
+    public bool TypeOf(string type) => TYPE_NAME == type;
 }

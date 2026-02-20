@@ -12,7 +12,7 @@ public class ConnectionComponent: IComponent, IStaticType {
     private const string TYPE_NAME = "ConnectionComponent";
 
     private Entity m_child = null!;
-    private Entity m_parent = null!;
+    private ConnectionDir m_direction = ConnectionDir.DOWN;
 
     /// <summary>
     /// Name of the component.
@@ -22,12 +22,17 @@ public class ConnectionComponent: IComponent, IStaticType {
     /// <summary>
     /// Next <see cref="Entity"/> instance from this <see cref="Entity"/>.
     /// </summary>
-    public Entity Next { get => m_child; set => m_child = value; }
+    public Entity Attached { get => m_child; set => m_child = value; }
 
     /// <summary>
-    /// Previous <see cref="Entity"/> in the UI tree.
+    /// Direction of the current connection in the hierarchy.
     /// </summary>
-    internal Entity Previous { get => m_parent; set => m_parent = value; }
+    public ConnectionDir Direction { get => m_direction; init => m_direction = value; }
 
-    public bool IsType(string type) => TYPE_NAME == type;
+    public bool TypeOf(string type) => TYPE_NAME == type;
+}
+
+public enum ConnectionDir: byte {
+    UP,
+    DOWN
 }

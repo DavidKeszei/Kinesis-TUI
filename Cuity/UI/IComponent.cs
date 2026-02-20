@@ -5,7 +5,7 @@ using System.Text;
 namespace Cuity.UI;
 
 /// <summary>
-/// Indicates a component for an object.
+/// Provides component-like behaviour for an object. 
 /// </summary>
 public interface IComponent {
 
@@ -14,5 +14,5 @@ public interface IComponent {
     /// </summary>
     /// <param name="type">Type name of the component.</param>
     /// <returns>Return <see langword="true"/>, if the <paramref name="type"/> is equal with the underlying name. Otherwise return <see langword="false"/>.</returns>
-    public bool IsType(string type);
+    public bool TypeOf(string type);
 }

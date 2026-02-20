@@ -10,8 +10,12 @@ namespace Cuity.UI;
 /// </summary>
 public readonly ref struct PageEntityVisitor {
     private readonly Entity? m_pivot = null!;
+    private readonly EntityChangeContext m_ctx = null!;
 
-    internal PageEntityVisitor(Entity? pivot) => m_pivot = pivot;
+    internal PageEntityVisitor(Entity? pivot, EntityChangeContext changeContext) {
+        m_ctx = changeContext;
+        m_pivot = pivot;
+    }
 
     /// <summary>
     /// Visit a specific <typeparamref name="T"/> entity in the tree.
@@ -21,9 +25,11 @@ public readonly ref struct PageEntityVisitor {
     /// <returns>Return a entity as <typeparamref name="T"/>. If not in the tree, then return <see langword="null"/>.</returns>
     public T? Visit<T>(string name) where T: Entity {
         if (string.IsNullOrEmpty(name) || m_pivot == null) return null!;
-        else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T) return m_pivot as T;
+        else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T) return (T)m_pivot;
 
         Entity? result = RecursiveVisit(current: m_pivot, name);
+        if (result != null) m_ctx.Add(result);
+
         return (T?)result;
     }
 
@@ -31,11 +37,13 @@ public readonly ref struct PageEntityVisitor {
         if (current == null) return null!;
 
         int childrenCount = CountOfChild(current);
-        for (int i = 0; i < childrenCount; ++i) {
-            Entity? child = current.GetComponent<ConnectionComponent>(i)?.Next;
+        for (int i = 1; i < childrenCount; ++i) {
+            Entity? child = current.GetComponent<ConnectionComponent>(index: i)?.Attached;
 
-            if (child != null && !string.IsNullOrEmpty(child.Name) && IsSequenceEqual(child.Name, name))
-                return child;
+            if (child != null) {
+                if (!string.IsNullOrEmpty(child.Name) && IsSequenceEqual(child.Name, name)) return child;
+                return RecursiveVisit(child, name);
+            }
         }
 
         return null!;
@@ -52,13 +60,11 @@ public readonly ref struct PageEntityVisitor {
     }
 
     private int CountOfChild(Entity entity) {
-        if(entity == null)
-            return 0;
-
+        if(entity == null) return 0;
         int count = 0;
 
-        foreach (IComponent component in entity) {
-            if (component.IsType(ConnectionComponent.Name))
+        foreach(IComponent component in entity) {
+            if (component.TypeOf(type: ConnectionComponent.Name))
                 ++count;
         }
 

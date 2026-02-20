@@ -43,7 +43,7 @@ public class Transform: IComponent, IStaticType {
         }
     }
 
-    public bool IsType(string type) => TYPE_NAME == type;
+    public bool TypeOf(string type) => TYPE_NAME == type;
 
     /// <summary>
     /// Old position of the <see cref="Transform"/> component.

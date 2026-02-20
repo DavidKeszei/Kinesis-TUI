@@ -11,8 +11,8 @@ namespace Cuity.UI;
 /// <summary>
 /// Interacts, when input was happened on the standard IO. 
 /// </summary>
-/// <typeparam name="T">Type of the child.</typeparam>
-public class OnInputUpdate<T>: Entity where T: Entity {
+public class OnInputUpdate: Entity {
+    private readonly EntityChangeContext m_context = null!;
 
     /// <summary>
     /// Callback, when the input was happened.
@@ -22,39 +22,32 @@ public class OnInputUpdate<T>: Entity where T: Entity {
             InteractionComponent? interaction = base.GetComponent<InteractionComponent>();
 
             if (interaction == null) {
-                Entity? child = base.GetComponent<ConnectionComponent>()?.Next;
-
-                interaction = new InteractionComponent(onInput: (message) => {
-                    RenderComponent? render = child?.GetComponent<RenderComponent>();
-
-                    value(message, new PageEntityVisitor(this));
-                    render?.IsDirty = true;
-
-                    child!.State = EntityState.LOCKED;
-                }, child!);
-
+                interaction = new InteractionComponent(onInput: (message) => SetCallback(value, message), m_context!);
                 base.AttachComponent<InteractionComponent>(interaction, isUnique: true);
             }
         }
     }
 
     /// <summary>
-    /// Attached child of the <see cref="OnRenderUpdate{T}"/>.
+    /// Attached child of the <see cref="OnInputUpdate"/>.
     /// </summary>
     public Entity Child {
         set {
-            ConnectionComponent? connection = base.GetComponent<ConnectionComponent>();
-            connection?.Next = value;
-
-            if ((connection = value.GetComponent<ConnectionComponent>()) == null) {
-                connection = new ConnectionComponent();
-                value.AttachComponent<ConnectionComponent>();
-            }
-
-            connection.Previous = this;
+            ConnectionComponent connection = base.GetComponent<ConnectionComponent>()!;
+            connection.Attached = value;
         }
     }
 
-    public OnInputUpdate() 
-        => base.AttachComponent<ConnectionComponent>(new ConnectionComponent(), isUnique: true);
+    public OnInputUpdate() {
+        base.AttachComponent<ConnectionComponent>(new ConnectionComponent() { Direction = ConnectionDir.UP   });
+        base.AttachComponent<ConnectionComponent>(new ConnectionComponent() { Direction = ConnectionDir.DOWN });
+
+        this.m_context = new EntityChangeContext();
+    }
+
+    private void SetCallback(Action<InputMessage, PageEntityVisitor> func, InputMessage message) {
+        m_context.Reset();
+        func(message, new PageEntityVisitor(this, m_context));
+        m_context.Lockdown();
+    }
 }

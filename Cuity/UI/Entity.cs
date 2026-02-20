@@ -54,8 +54,8 @@ public class Entity {
     /// <returns>Return <see langword="true"/> if the component is added to the entity. Otherwise return <see langword="false"/>.</returns>
     public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, IStaticType {
         if (component == null) return false;
-        if(isUnique || component.IsType(RenderComponent.Name)) {
-            if(!m_uniqueComponents.TryAdd(ComponentTypeProvider.QueryComponent(T.Name), m_components.Count))
+        if(isUnique || component.TypeOf(type: RenderComponent.Name)) {
+            if(!m_uniqueComponents.TryAdd(ComponentTypeProvider.QueryComponent(name: T.Name), m_components.Count))
                 return false;
         }
 
@@ -69,6 +69,7 @@ public class Entity {
     /// Get a(n) <typeparamref name="T"/> component from the current instance.
     /// </summary>
     /// <typeparam name="T">Type of the component.</typeparam>
+    /// <param name="index">Indicates, which component we wan't from the type. (Example: if the index = 1, then return second component of the <typeparamref name="T"/>.)</param>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
     public virtual T? GetComponent<T>(int index = 0) where T: class, IComponent, IStaticType {
         if (m_uniqueComponents.TryGetValue(ComponentTypeProvider.QueryComponent(T.Name), out int i))
@@ -76,7 +77,7 @@ public class Entity {
 
         int current = 0;
         foreach (IComponent component in m_components) {
-            if (component.IsType(T.Name) && current++ == index)
+            if (component.TypeOf(T.Name) && current++ == index)
                 return component as T;
         }
 
@@ -89,7 +90,7 @@ public class Entity {
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <param name="index">Indicates where we want delete the component.</param>
     public void RemoveComponent<T>(int index = 0) where T: class, IComponent, IStaticType {
-        if (m_uniqueComponents.TryGetValue(key: ComponentTypeProvider.QueryComponent(T.Name), out int i)) {
+        if (m_uniqueComponents.TryGetValue(key: ComponentTypeProvider.QueryComponent(name: T.Name), out int i)) {
             m_components.RemoveAt(i);
             m_uniqueComponents.Remove(key: ComponentTypeProvider.QueryComponent(name: T.Name));
 
@@ -100,7 +101,7 @@ public class Entity {
         int indexOf = 0;
 
         foreach (IComponent component in m_components) {
-            if (component.IsType(T.Name) && ++indexOf == index) {
+            if (component.TypeOf(type: T.Name) && ++indexOf == index) {
                 m_components.RemoveAt(index);
                 ++m_version;
                 return;
@@ -108,36 +109,17 @@ public class Entity {
         }
     }
 
+    public ComponentIterator GetEnumerator()
+        => new ComponentIterator(components: m_components);
+
     /// <summary>
     /// Resolve all <see cref="IStyleComponent"/> instances, which attached to the current instance.
     /// </summary>
     /// <returns>Return a <see cref="IEnumerable{T}"/> instance.</returns>
     internal IEnumerable<IStyleComponent> ResolveStyles() {
         foreach(IComponent component in m_components) {
-            if(component.IsType(type: Style.Name))
+            if(component.TypeOf(type: Style.Name))
                 yield return ((Style)component);
         }
-    }
-
-    public ComponentIterator GetEnumerator() => new ComponentIterator(components: m_components);
-}
-
-/// <summary>
-/// Ref-like iterator for <see cref="IComponent"/> instances.
-/// </summary>
-public ref struct ComponentIterator {
-    private List<IComponent> m_components = null!;
-    private int m_current = -1;
-
-    public IComponent Current { get => m_components[m_current]; }
-
-    public ComponentIterator(List<IComponent> components)
-        => m_components = components;
-
-    public bool MoveNext() {
-        if (++m_current < m_components.Count)
-            return true;
-
-        return false;
     }
 }

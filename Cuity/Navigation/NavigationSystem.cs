@@ -9,7 +9,7 @@ namespace Cuity.Navigation;
 /// <summary>
 /// Represent a stack-based navigator in the library.
 /// </summary>
-public class NavigationSystem: ISystem {
+public class NavigationSystem: INavigator {
     private readonly Dictionary<string, NavigationTarget> m_routes = null!;
     private readonly Stack<Page> m_navigationFrame = null!;
 
@@ -77,10 +77,3 @@ public class NavigationSystem: ISystem {
     /// </summary>
     public void NavigateBack() => m_navigationFrame.Pop();
 }
-
-/// <summary>
-/// Represent a target for a navigation.
-/// </summary>
-/// <param name="Creation">Creation method for a <see cref="UI.Page"/>.</param>
-/// <param name="Page">The page itself.</param>
-internal record NavigationTarget(Func<ISystemProvider, Page> Creation, Page? Page);

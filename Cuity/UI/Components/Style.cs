@@ -78,7 +78,7 @@ public class Style: IStyleComponent, IStaticType {
     /// <returns>Return a <see cref="Style"/> instance.</returns>
     public static Style CreateFromAttributes(StyleTag tag, StyleFlag flag) => new Style(tag, flag);
 
-    public bool IsType(string type) => TYPE_NAME == type;
+    public bool TypeOf(string type) => TYPE_NAME == type;
 }
 
 /// <summary>

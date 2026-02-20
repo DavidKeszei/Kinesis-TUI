@@ -8,53 +8,45 @@ using System.Text;
 namespace Cuity.UI;
 
 /// <summary>
-/// Interacts, when input was happened on the standard IO. 
+/// Interacts, when a frame was rendered.
 /// </summary>
-/// <typeparam name="T">Type of the child.</typeparam>
-public class OnRenderUpdate<T> : Entity where T : Entity {
+public class OnRenderUpdate: Entity {
+    private readonly EntityChangeContext m_context = null!;
 
     /// <summary>
-    /// Callback, when the input was happened.
+    /// Callback, when a frame was rendered.
     /// </summary>
     public Action<RenderMessage, PageEntityVisitor> On {
         set {
-            InteractionComponent? interaction = base.GetComponent<InteractionComponent>();
+            InteractionComponent? interaction = base.GetComponent<InteractionComponent>(0);
 
             if (interaction == null) {
-                Entity? child = base.GetComponent<ConnectionComponent>()?.Next;
-
-                interaction = new InteractionComponent(onRender: (message) => {
-                    child = base.GetComponent<ConnectionComponent>()?.Next;
-                    RenderComponent? render = child?.GetComponent<RenderComponent>();
-
-                    value(message, new PageEntityVisitor(this));
-                    render?.IsDirty = true;
-
-                    child!.State = EntityState.LOCKED;
-                }, child!);
-
+                interaction = new InteractionComponent(onRender: (message) => SetCallback(value, message), m_context);
                 base.AttachComponent<InteractionComponent>(interaction, isUnique: true);
             }
         }
     }
 
     /// <summary>
-    /// Attached child of the <see cref="OnRenderUpdate{T}"/>.
+    /// Attached child of the <see cref="OnRenderUpdate"/>.
     /// </summary>
     public Entity Child {
         set {
-            ConnectionComponent? connection = base.GetComponent<ConnectionComponent>();
-            connection?.Next = value;
-
-            if ((connection = value.GetComponent<ConnectionComponent>()) == null) {
-                connection = new ConnectionComponent();
-                value.AttachComponent<ConnectionComponent>();
-            }
-
-            connection.Previous = this;
+            ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
+            connection?.Attached = value;
         }
     }
 
-    public OnRenderUpdate()
-        => base.AttachComponent<ConnectionComponent>(new ConnectionComponent(), isUnique: true);
+    public OnRenderUpdate() {
+        base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.UP });
+        base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.DOWN });
+
+        this.m_context = new EntityChangeContext();
+    }
+
+    private void SetCallback(Action<RenderMessage, PageEntityVisitor> func, RenderMessage message) {
+        m_context.Reset();
+        func(message, new PageEntityVisitor(this, m_context));
+        m_context.Lockdown();
+    }
 }

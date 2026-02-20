@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Cuity;
 
+/// <summary>
+/// Represent a simple registry for <see cref="IComponent"/> instances.
+/// </summary>
 internal static class ComponentTypeProvider {
     private static readonly Dictionary<string, int> m_registeredComponents = null!;
 
