@@ -29,7 +29,7 @@ public interface IDynamicSystem: ISystem {
 public enum SystemInvocationTime: byte {
     ON_BEGIN,
     ON_END,
-    NEVER
+    ON_CALL
 }
 
 public enum SystemBehavior: byte {

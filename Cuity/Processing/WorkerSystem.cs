@@ -12,8 +12,8 @@ namespace Cuity.Processing;
 /// Represent smallest unit of work.
 /// </summary>
 /// <param name="Action">Callback of the work.</param>
-/// <param name="Context">The target itself.</param>
-internal record WorkTarget(Delegate Action, EntityChangeContext Context);
+/// <param name="Context">The context, which holds all changes on the entities.</param>
+internal record WorkTarget(Delegate Action, EntityContext Context, Island Island);
 
 /// <summary>
 /// Represent a bunch of workers for different tasks.
@@ -57,7 +57,7 @@ internal class WorkerSystem: IDynamicSystem {
     /// </summary>
     /// <param name="work">Current work item.</param>
     /// <param name="context">Holds the changed entities.</param>
-    public void AddCallback<T>(Action<T> work, EntityChangeContext context) => m_targets.Enqueue(new WorkTarget(work, context));
+    public void AddCallback<T>(Action<T> work, EntityContext context, Island island) => m_targets.Enqueue(new WorkTarget(work, context, island));
 
     public void Run() {
         Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
@@ -69,9 +69,10 @@ internal class WorkerSystem: IDynamicSystem {
             }
 
             foreach (WorkTarget tuple in m_targets) {
+                if (!tuple.Island.IsActve) continue;
+
                 switch (message.Source) {
                     case WorkMessageSource.INPUT:
-
                         if(tuple.Action is Action<InputMessage> onInput)
                             onInput(message.Input);
 

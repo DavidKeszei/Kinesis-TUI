@@ -34,11 +34,17 @@ public sealed class Engine: ISystemProvider {
 
         m_customSystems = new List<SystemInvocationInfo>();
         RegisterBuiltInComponents();
+
+        Console.InputEncoding = Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
+
+        /* Make sure the NavigatorSystem is can be queried */
+        m_customSystems.Add(new SystemInvocationInfo(null!, m_navigator, SystemInvocationTime.ON_CALL));
     }
 
     public T? GetSystem<T>() where T: class, ISystem {
         for (int i = 0; i < m_customSystems.Count; ++i) {
-            if (m_customSystems[i].When == SystemInvocationTime.NEVER && m_customSystems[i].System is T) {
+            if (m_customSystems[i].When == SystemInvocationTime.ON_CALL && m_customSystems[i].System is T) {
 
                 if (m_customSystems[i].System == null!)
                     m_customSystems[i] = m_customSystems[i] with { System = m_customSystems[i].Creation(this) };
@@ -65,9 +71,9 @@ public sealed class Engine: ISystemProvider {
     /// Register a named route with a <paramref name="pageCreation"/> method.
     /// </summary>
     /// <param name="name">Name of the route.</param>
-    /// <param name="pageCreation">Creation method of the <see cref="Page"/>.</param>
+    /// <param name="pageCreation">Creation method of the <see cref="Island"/>.</param>
     /// <returns>Return <see langword="true"/>, if the route is successfully registered. Otherwise return <see langword="false"/>.</returns>
-    public bool AddPage<T>(string name, Func<ISystemProvider, T> pageCreation) where T: Page
+    public bool AddPage<T>(string name, Func<ISystemProvider, T> pageCreation) where T: Island
         => m_navigator.Register(name, pageCreation);
 
     /// <summary>

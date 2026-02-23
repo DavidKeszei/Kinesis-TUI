@@ -11,7 +11,8 @@ namespace Cuity.UI;
 /// Interacts, when a frame was rendered.
 /// </summary>
 public class OnRenderUpdate: Entity {
-    private readonly EntityChangeContext m_context = null!;
+    private readonly EntityContext m_context = null!;
+    private readonly Island m_island = null!;
 
     /// <summary>
     /// Callback, when a frame was rendered.
@@ -21,7 +22,7 @@ public class OnRenderUpdate: Entity {
             InteractionComponent? interaction = base.GetComponent<InteractionComponent>(0);
 
             if (interaction == null) {
-                interaction = new InteractionComponent(onRender: (message) => SetCallback(value, message), m_context);
+                interaction = new InteractionComponent(onRender: (message) => SetCallback(value, message), m_context, m_island);
                 base.AttachComponent<InteractionComponent>(interaction, isUnique: true);
             }
         }
@@ -34,14 +35,19 @@ public class OnRenderUpdate: Entity {
         set {
             ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
             connection?.Attached = value;
+
+            connection?.Attached.GetComponent<ConnectionComponent>()?
+                       .Attached = this;
+                       
         }
     }
 
-    public OnRenderUpdate() {
+    public OnRenderUpdate(Island island) {
         base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.UP });
         base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.DOWN });
 
-        this.m_context = new EntityChangeContext();
+        this.m_island = island;
+        this.m_context = new EntityContext();
     }
 
     private void SetCallback(Action<RenderMessage, PageEntityVisitor> func, RenderMessage message) {

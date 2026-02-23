@@ -8,13 +8,13 @@ namespace Cuity.UI;
 /// <summary>
 /// Represent a holder of changes on <see cref="Entity"/> instances.
 /// </summary>
-public class EntityChangeContext {
+public class EntityContext {
     private readonly HashSet<Entity> m_diff = null!;
     private readonly Entity[] m_changes = null!;
 
     private int m_count = 0;
 
-    public EntityChangeContext(int capacity = 32) {
+    public EntityContext(int capacity = 32) {
         m_changes = new Entity[capacity];
         m_diff = new HashSet<Entity>(capacity);
     }

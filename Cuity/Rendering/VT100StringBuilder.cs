@@ -10,13 +10,13 @@ namespace Cuity.Rendering;
 /// Helper structure for building VT100 strings without any heap-allocation.
 /// </summary>
 internal ref struct VT100StringBuilder {
-    private const string ESC = "\x1b[";
-    private const string ESC_CLEAR = "\x1b[0m";
+    private const string ESC = "\e[";
+    private const string ESC_CLEAR = "\e[0m";
 
-    private const string ESC_BG = "\x1b[48;2;";
-    private const string ESC_FG = "\x1b[38;2;";
+    private const string ESC_BG = "\e[48;2;";
+    private const string ESC_FG = "\e[38;2;";
 
-    private const string ESC_BG_DEFAULT = "\x1b[49m";
+    private const string ESC_BG_DEFAULT = "\e[49m";
 
     /// <summary>
     /// Maximum length of the command, which contains all of the commands.
@@ -41,7 +41,7 @@ internal ref struct VT100StringBuilder {
         ++x;
         ++y;
 
-        m_stack[m_position++] = '\x1b';
+        m_stack[m_position++] = '\e';
         m_stack[m_position++] = '[';
 
         _ = y.TryFormat(m_stack[m_position..], out int written);
@@ -66,20 +66,21 @@ internal ref struct VT100StringBuilder {
         if ((m_background.Equals(rgb: color) && isBackground) || (m_foreground.Equals(rgb: color) && !isBackground))
             return this;
 
-        m_stack[m_position++] = '\x1b';
+        m_stack[m_position++] = '\e';
         (isBackground ? ESC_BG : ESC_FG).CopyTo(m_stack[m_position..]);
 
         m_position += (isBackground ? ESC_BG : ESC_FG).Length;
+        float alpha = color.A / 255f;
 
-        color.R.TryFormat(m_stack[m_position..], out int written);
+        ((byte)(color.R * alpha)).TryFormat(m_stack[m_position..], out int written);
         m_position += written;
         m_stack[m_position++] = ';';
 
-        color.G.TryFormat(m_stack[m_position..], out written);
+        ((byte)(color.G * alpha)).TryFormat(m_stack[m_position..], out written);
         m_position += written;
         m_stack[m_position++] = ';';
 
-        color.B.TryFormat(m_stack[m_position..], out written);
+        ((byte)(color.B * alpha)).TryFormat(m_stack[m_position..], out written);
         m_position += written;
         m_stack[m_position++] = 'm';
 

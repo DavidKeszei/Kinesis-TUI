@@ -9,5 +9,5 @@ namespace Cuity.UI;
 /// </summary>
 internal enum EntityState : byte {
     LOCKED,
-    FREE
+    FREE,
 }

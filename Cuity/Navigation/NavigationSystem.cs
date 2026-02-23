@@ -11,7 +11,7 @@ namespace Cuity.Navigation;
 /// </summary>
 public class NavigationSystem: INavigator {
     private readonly Dictionary<string, NavigationTarget> m_routes = null!;
-    private readonly Stack<Page> m_navigationFrame = null!;
+    private readonly Stack<Island> m_navigationFrame = null!;
 
     private readonly ISystemProvider m_provider = null!;
 
@@ -20,9 +20,9 @@ public class NavigationSystem: INavigator {
     /// <summary>
     /// Current page of the application.
     /// </summary>
-    internal Page Current { 
+    internal Island Current { 
         get {
-            if (!m_navigationFrame.TryPeek(out Page? page))
+            if (!m_navigationFrame.TryPeek(out Island? page))
                 return null!;
 
             if (!page.Tree.Any())
@@ -35,7 +35,7 @@ public class NavigationSystem: INavigator {
     internal NavigationSystem(ISystemProvider provider) {
         m_provider = provider;
 
-        m_navigationFrame = new Stack<Page>();
+        m_navigationFrame = new Stack<Island>();
         m_routes = new Dictionary<string, NavigationTarget>();
     }
 
@@ -45,12 +45,14 @@ public class NavigationSystem: INavigator {
     /// <param name="route">Route identifier of the page.</param>
     /// <param name="creationMethod">Page of the route.</param>
     /// <returns>Return <see langword="true"/>, if the route is successfully added to the <see cref="NavigationSystem"/>.</returns>
-    internal bool Register(string route, Func<ISystemProvider, Page> creationMethod) {
+    internal bool Register(string route, Func<ISystemProvider, Island> creationMethod) {
         bool success = m_routes.TryAdd(route, new NavigationTarget(creationMethod, null!));
         if (m_navigationFrame.Count == 0 && success) {
 
             m_routes[route] = new NavigationTarget(Creation: null!, Page: m_routes[route].Creation(m_provider));
             m_navigationFrame.Push(m_routes[route].Page!);
+
+            m_routes[route].Page!.IsActve = true;
         }
 
         return success;
@@ -60,20 +62,30 @@ public class NavigationSystem: INavigator {
     /// Navigate to the specified <paramref name="page"/>.
     /// </summary>
     /// <param name="page">Creation method for the page.</param>
-    public void NavigateTo(Func<ISystemProvider, Page> page) {
-        Page target = page(m_provider);
+    public void NavigateTo(Func<ISystemProvider, Island> page) {
+        Island target = page(m_provider);
+        target.IsActve = true;
+
         m_navigationFrame.Push(target);
     }
 
     public void NavigateTo(string route) {
-        (Func<ISystemProvider, Page> creation, Page? page) = m_routes[route];
+        (Func<ISystemProvider, Island> creation, Island? page) = m_routes[route];
         page ??= creation(m_provider);
+
+        page.IsActve = true;
+        m_navigationFrame.Peek().IsActve = false;
 
         m_navigationFrame.Push(page);
     }
 
     /// <summary>
-    /// Navigate back to the previous <see cref="Page"/>.
+    /// Navigate back to the previous <see cref="Island"/>.
     /// </summary>
-    public void NavigateBack() => m_navigationFrame.Pop();
+    public void NavigateBack() {
+        Island current = m_navigationFrame.Pop();
+        current.IsActve = false;
+
+        m_navigationFrame.Peek().IsActve = true;
+    }
 }

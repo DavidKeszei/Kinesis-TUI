@@ -1,5 +1,7 @@
 ﻿using Cuity.Rendering;
 using Cuity.UI.Components;
+using Cuity.Navigation;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,10 +9,11 @@ using System.Text;
 namespace Cuity.UI;
 
 /// <summary>
-/// Represent an UI page on the screen.
+/// Represent a segment on the screen.
 /// </summary>
-public abstract class Page {
+public abstract class Island {
     private readonly List<Entity> m_renderSet = null!;
+    private bool m_isActive = false;
 
     /// <summary>
     /// Created <see cref="Entity"/> instance-tree as "list".
@@ -18,18 +21,23 @@ public abstract class Page {
     internal IReadOnlyList<Entity> Tree { get => m_renderSet; }
 
     /// <summary>
-    /// Implicit conversion between <see cref="Page"/> and <see cref="Entity"/>.
+    /// Indicates the <see cref="Island"/> is active by the <see cref="Renderer"/> and the <see cref="INavigator"/>.
+    /// </summary>
+    internal bool IsActve { get => m_isActive; set => m_isActive = value; }
+
+    /// <summary>
+    /// Implicit conversion between <see cref="Island"/> and <see cref="Entity"/>.
     /// </summary>
     /// <param name="page"></param>
-    public static implicit operator Entity(Page page) => page.Build()!;
+    public static implicit operator Entity(Island page) => page.Build()!;
 
-    public Page()
+    public Island()
         => m_renderSet = new List<Entity>(capacity: 32);
 
     /// <summary>
     /// Build the page as <see cref="Entity"/>.
     /// </summary>
-    /// <returns>Return <see cref="Entity"/> instance from the current <see cref="Page"/>.</returns>
+    /// <returns>Return <see cref="Entity"/> instance from the current <see cref="Island"/>.</returns>
     protected abstract Entity? Build();
 
     /// <summary>
@@ -54,7 +62,7 @@ public abstract class Page {
 
         int count = 0;
         foreach (IComponent component in entity) {
-            if (component.TypeOf(nameof(ConnectionComponent)))
+            if (component.TypeOf(ConnectionComponent.Name))
                 ++count;
         }
 

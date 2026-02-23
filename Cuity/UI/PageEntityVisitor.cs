@@ -10,9 +10,9 @@ namespace Cuity.UI;
 /// </summary>
 public readonly ref struct PageEntityVisitor {
     private readonly Entity? m_pivot = null!;
-    private readonly EntityChangeContext m_ctx = null!;
+    private readonly EntityContext m_ctx = null!;
 
-    internal PageEntityVisitor(Entity? pivot, EntityChangeContext changeContext) {
+    internal PageEntityVisitor(Entity? pivot, EntityContext changeContext) {
         m_ctx = changeContext;
         m_pivot = pivot;
     }
@@ -42,7 +42,12 @@ public readonly ref struct PageEntityVisitor {
 
             if (child != null) {
                 if (!string.IsNullOrEmpty(child.Name) && IsSequenceEqual(child.Name, name)) return child;
-                return RecursiveVisit(child, name);
+                else {
+                    child = RecursiveVisit(child, name);
+
+                    if (child != null)
+                        return child;
+                }
             }
         }
 

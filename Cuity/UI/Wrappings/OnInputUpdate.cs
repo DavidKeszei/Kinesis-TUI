@@ -12,7 +12,8 @@ namespace Cuity.UI;
 /// Interacts, when input was happened on the standard IO. 
 /// </summary>
 public class OnInputUpdate: Entity {
-    private readonly EntityChangeContext m_context = null!;
+    private readonly EntityContext m_context = null!;
+    private readonly Island m_island = null!;
 
     /// <summary>
     /// Callback, when the input was happened.
@@ -22,7 +23,7 @@ public class OnInputUpdate: Entity {
             InteractionComponent? interaction = base.GetComponent<InteractionComponent>();
 
             if (interaction == null) {
-                interaction = new InteractionComponent(onInput: (message) => SetCallback(value, message), m_context!);
+                interaction = new InteractionComponent(onInput: (message) => SetCallback(value, message), m_context!, m_island);
                 base.AttachComponent<InteractionComponent>(interaction, isUnique: true);
             }
         }
@@ -33,16 +34,19 @@ public class OnInputUpdate: Entity {
     /// </summary>
     public Entity Child {
         set {
-            ConnectionComponent connection = base.GetComponent<ConnectionComponent>()!;
+            ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
             connection.Attached = value;
+
+            value.GetComponent<ConnectionComponent>()!.Attached = this;
         }
     }
 
-    public OnInputUpdate() {
+    public OnInputUpdate(Island island) {
         base.AttachComponent<ConnectionComponent>(new ConnectionComponent() { Direction = ConnectionDir.UP   });
         base.AttachComponent<ConnectionComponent>(new ConnectionComponent() { Direction = ConnectionDir.DOWN });
 
-        this.m_context = new EntityChangeContext();
+        this.m_island = island;
+        this.m_context = new EntityContext();
     }
 
     private void SetCallback(Action<InputMessage, PageEntityVisitor> func, InputMessage message) {

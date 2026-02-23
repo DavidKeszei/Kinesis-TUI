@@ -20,6 +20,7 @@ public class Renderer {
     private Vec2 m_scale = Vec2.Zero;
 
     private float m_currentFrameTime = .0f;
+    private RGB m_background = RGB.Transparent;
 
     /// <summary>
     /// Current scale of the screen.
@@ -39,8 +40,7 @@ public class Renderer {
     /// <summary>
     /// Create a new <see cref="Renderer"/> instance with specific <paramref name="x"/> and <paramref name="y"/> scale.
     /// </summary>
-    /// <param name="x">Width of the renderer.</param>
-    /// <param name="y">Height of the renderer.</param>
+    /// <param name="scale">Scale of the console screen.</param>
     public Renderer(Vec2 scale) {
         m_frontBuffer = new ConsoleBuffer((int)scale.X, (int)scale.Y);
         m_backBuffer = new ConsoleBuffer((int)scale.X, (int)scale.Y);
@@ -49,9 +49,7 @@ public class Renderer {
         m_output = new StreamWriter(stream: Console.OpenStandardOutput());
 
         m_output.AutoFlush = false;
-
         Console.CursorVisible = false;
-        Console.OutputEncoding = Encoding.UTF8;
     }
 
     /// <summary>

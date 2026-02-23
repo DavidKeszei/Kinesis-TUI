@@ -8,6 +8,6 @@ namespace Cuity.Navigation;
 /// <summary>
 /// Represent a target for a navigation.
 /// </summary>
-/// <param name="Creation">Creation method for a <see cref="UI.Page"/>.</param>
+/// <param name="Creation">Creation method for a <see cref="UI.Island"/>.</param>
 /// <param name="Page">The page itself.</param>
-internal record NavigationTarget(Func<ISystemProvider, Page> Creation, Page? Page);
+internal record NavigationTarget(Func<ISystemProvider, Island> Creation, Island? Page);

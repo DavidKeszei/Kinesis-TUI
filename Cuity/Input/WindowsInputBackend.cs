@@ -22,8 +22,7 @@ internal partial class WindowsInputBackend: IInputBackend {
     private const uint STD_IN = uint.MaxValue - 10 + 1;
     private const int MAX_CHAR = 1;
 
-    private const int UTF8_PAGE = 65001;
-    private const string DEDICATED_THREAD_NAME = "THREAD::INPUT::NATIVE";
+    private const string DEDICATED_THREAD_NAME = "<Thread> Input::Native";
 
     #endregion
 
@@ -54,12 +53,12 @@ internal partial class WindowsInputBackend: IInputBackend {
     [LibraryImport(libraryName: USER32_LIB, EntryPoint = "VkKeyScanW")]
     private static partial short GetCode(int character);
 
-    [LibraryImport(libraryName: KERNEL32_LIB, EntryPoint = "SetConsoleOutputCP")]
-    [return: MarshalAs(unmanagedType: UnmanagedType.Bool)]
-    private static partial bool SetOutputEncoding(uint page);
-
     #endregion
 
+    /// <summary>
+    /// Create new <see cref="WindowsInputBackend"/> instance.
+    /// </summary>
+    /// <returns>Return a fresh <see cref="WindowsInputBackend"/> instance. If something goes wrong, then return <see cref="IInputBackend.ERR"/>.</returns>
     public static IInputBackend Init() {
         WindowsInputBackend backend = new WindowsInputBackend();
         backend.m_handle = GetStandardHandle(STD_IN);
@@ -78,9 +77,6 @@ internal partial class WindowsInputBackend: IInputBackend {
                 }
             }
         });
-
-        if (!SetOutputEncoding(page: UTF8_PAGE))
-            return IInputBackend.ERR;
 
         return backend;
     }
