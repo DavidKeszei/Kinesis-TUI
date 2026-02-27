@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 /CuityTest/CuityTest.csproj
 /CuityTest/Program.cs
+/CuityTest/CuityTest.csproj
+/CuityTest/Program.cs
+/CuityTest/AppPage.cs
+/CuityTest/SimplePage.cs
