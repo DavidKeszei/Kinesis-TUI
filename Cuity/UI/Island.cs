@@ -1,12 +1,12 @@
-﻿using Cuity.Rendering;
-using Cuity.UI.Components;
-using Cuity.Navigation;
+﻿using Kinesis.Rendering;
+using Kinesis.UI.Components;
+using Kinesis.Navigation;
 
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Represent a segment on the screen.
@@ -23,13 +23,13 @@ public abstract class Island {
     /// <summary>
     /// Indicates the <see cref="Island"/> is active by the <see cref="Renderer"/> and the <see cref="INavigator"/>.
     /// </summary>
-    internal bool IsActve { get => m_isActive; set => m_isActive = value; }
+    internal bool IsActive { get => m_isActive; set => m_isActive = value; }
 
     /// <summary>
     /// Implicit conversion between <see cref="Island"/> and <see cref="Entity"/>.
     /// </summary>
-    /// <param name="page"></param>
-    public static implicit operator Entity(Island page) => page.Build()!;
+    /// <param name="island">Current <see cref="Island"/> instance.</param>
+    public static explicit operator Entity?(Island island) => island.Build();
 
     public Island()
         => m_renderSet = new List<Entity>(capacity: 32);
@@ -52,7 +52,9 @@ public abstract class Island {
 
         for (int i = 1; i < childrenCount; ++i) {
             ConnectionComponent child = entity!.GetComponent<ConnectionComponent>(i)!;
-            CreateRenderSet(entity: child.Attached);
+
+            if(child.Attached != null) 
+                CreateRenderSet(entity: child.Attached);
         }
     }
 

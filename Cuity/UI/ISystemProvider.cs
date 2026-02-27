@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Provides functionality for query <see cref="ISystem"/> instances.

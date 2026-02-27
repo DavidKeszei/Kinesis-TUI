@@ -1,9 +1,9 @@
-﻿using Cuity.UI;
+﻿using Kinesis.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity;
+namespace Kinesis;
 
 /// <summary>
 /// Represent a simple registry for <see cref="IComponent"/> instances.

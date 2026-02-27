@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Cuity.Rendering;
+namespace Kinesis.Rendering;
 
 /// <summary>
 /// Represent a <see cref="RGB"/> color on the screen.

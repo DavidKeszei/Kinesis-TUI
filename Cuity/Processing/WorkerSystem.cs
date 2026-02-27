@@ -1,12 +1,12 @@
-﻿using Cuity.Input;
-using Cuity.Rendering;
-using Cuity.UI;
+﻿using Kinesis.Input;
+using Kinesis.Rendering;
+using Kinesis.UI;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Processing;
+namespace Kinesis.Processing;
 
 /// <summary>
 /// Represent smallest unit of work.
@@ -68,18 +68,18 @@ internal class WorkerSystem: IDynamicSystem {
                 continue;
             }
 
-            foreach (WorkTarget tuple in m_targets) {
-                if (!tuple.Island.IsActve) continue;
+            foreach (WorkTarget workUnit in m_targets) {
+                if (!workUnit.Island.IsActive) continue;
 
                 switch (message.Source) {
                     case WorkMessageSource.INPUT:
-                        if(tuple.Action is Action<InputMessage> onInput)
+                        if(workUnit.Action is Action<InputMessage> onInput)
                             onInput(message.Input);
 
                         break;
 
                     case WorkMessageSource.RENDERING:
-                        if (!tuple.Context.IsLocked() && tuple.Action is Action<RenderMessage> onRender)
+                        if (!workUnit.Context.IsLocked() && workUnit.Action is Action<RenderMessage> onRender)
                             onRender(message.Render);
 
                         break;

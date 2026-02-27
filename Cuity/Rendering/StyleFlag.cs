@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Rendering;
+namespace Kinesis.Rendering;
 
 /// <summary>
 /// Enumeration of supported character styles.

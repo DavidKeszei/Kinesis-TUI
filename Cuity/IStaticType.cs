@@ -2,8 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity;
+namespace Kinesis;
 
+/// <summary>
+/// Provides static "type-detection" for an object.
+/// </summary>
 public interface IStaticType {
+
+    /// <summary>
+    /// Name of the "type".
+    /// </summary>
     public abstract static string Name { get; }
 }

@@ -1,9 +1,9 @@
-﻿using Cuity.UI.Components;
+﻿using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Represent a local visitor on the entity-tree to the bottom.
@@ -22,13 +22,14 @@ public readonly ref struct PageEntityVisitor {
     /// </summary>
     /// <typeparam name="T">Type of the entity.</typeparam>
     /// <param name="name">Unique name of the entity.</param>
+    /// <param name="track">Indicates the visited entity must be updated after the visit. If this <see langword="false"/>, then any change is not propagated.</param>
     /// <returns>Return a entity as <typeparamref name="T"/>. If not in the tree, then return <see langword="null"/>.</returns>
-    public T? Visit<T>(string name) where T: Entity {
+    public T? Visit<T>(string name, bool track = true) where T: Entity {
         if (string.IsNullOrEmpty(name) || m_pivot == null) return null!;
-        else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T) return (T)m_pivot;
+        else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T ret) return ret;
 
         Entity? result = RecursiveVisit(current: m_pivot, name);
-        if (result != null) m_ctx.Add(result);
+        if (result != null && track) m_ctx.Add(result);
 
         return (T?)result;
     }

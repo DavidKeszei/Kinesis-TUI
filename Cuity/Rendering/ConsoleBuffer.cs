@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Rendering;
+namespace Kinesis.Rendering;
 
 /// <summary>
 /// Represent a <see cref="ConsoleBuffer"/> on the screen.

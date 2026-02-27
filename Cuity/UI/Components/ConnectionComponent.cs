@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Cuity.UI.Components;
+namespace Kinesis.UI.Components;
 
 /// <summary>
 /// Represent a component, which can hold a <typeparamref name="T"/> instance.
@@ -18,6 +18,11 @@ public class ConnectionComponent: IComponent, IStaticType {
     /// Name of the component.
     /// </summary>
     public static string Name { get => TYPE_NAME; }
+
+    /// <summary>
+    /// Index of the parent on every <see cref="Entity"/> instance.
+    /// </summary>
+    public static int ParentOf { get => 0; }
 
     /// <summary>
     /// Next <see cref="Entity"/> instance from this <see cref="Entity"/>.

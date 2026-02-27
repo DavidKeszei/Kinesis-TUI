@@ -1,9 +1,9 @@
-﻿using Cuity.Rendering;
+﻿using Kinesis.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI.Components;
+namespace Kinesis.UI.Components;
 
 /// <summary>
 /// Represent a component, which can drawing a box to the screen.

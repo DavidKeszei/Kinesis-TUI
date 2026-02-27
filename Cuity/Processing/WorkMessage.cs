@@ -1,10 +1,10 @@
-﻿using Cuity.Input;
+﻿using Kinesis.Input;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Cuity.Processing;
+namespace Kinesis.Processing;
 
 /// <summary>
 /// Represent a message in the <see cref="WorkerSystem"/>.

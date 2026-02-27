@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI.Components;
+namespace Kinesis.UI.Components;
 
 /// <summary>
 /// Represent a component, which contains the transform of a <see cref="Entity"/>.

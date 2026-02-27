@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Cuity.UI;
+using Kinesis.UI;
 
-namespace Cuity.Navigation;
+namespace Kinesis.Navigation;
 
 /// <summary>
 /// Represent a stack-based navigator in the library.
@@ -52,7 +52,7 @@ public class NavigationSystem: INavigator {
             m_routes[route] = new NavigationTarget(Creation: null!, Page: m_routes[route].Creation(m_provider));
             m_navigationFrame.Push(m_routes[route].Page!);
 
-            m_routes[route].Page!.IsActve = true;
+            m_routes[route].Page!.IsActive = true;
         }
 
         return success;
@@ -64,7 +64,7 @@ public class NavigationSystem: INavigator {
     /// <param name="page">Creation method for the page.</param>
     public void NavigateTo(Func<ISystemProvider, Island> page) {
         Island target = page(m_provider);
-        target.IsActve = true;
+        target.IsActive = true;
 
         m_navigationFrame.Push(target);
     }
@@ -73,8 +73,8 @@ public class NavigationSystem: INavigator {
         (Func<ISystemProvider, Island> creation, Island? page) = m_routes[route];
         page ??= creation(m_provider);
 
-        page.IsActve = true;
-        m_navigationFrame.Peek().IsActve = false;
+        page.IsActive = true;
+        m_navigationFrame.Peek().IsActive = false;
 
         m_navigationFrame.Push(page);
     }
@@ -84,8 +84,8 @@ public class NavigationSystem: INavigator {
     /// </summary>
     public void NavigateBack() {
         Island current = m_navigationFrame.Pop();
-        current.IsActve = false;
+        current.IsActive = false;
 
-        m_navigationFrame.Peek().IsActve = true;
+        m_navigationFrame.Peek().IsActive = true;
     }
 }

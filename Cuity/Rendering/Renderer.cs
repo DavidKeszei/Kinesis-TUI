@@ -1,10 +1,10 @@
-﻿using Cuity.UI;
-using Cuity.UI.Components;
+﻿using Kinesis.UI;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Rendering;
+namespace Kinesis.Rendering;
 
 /// <summary>
 /// Represent the rendering engine of the library.
@@ -73,11 +73,7 @@ public class Renderer {
 
                 renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
                 renderLogic.IsDirty = false;
-                
-                /* 
-                 * Under the hood, the Transform component always update the old & new position, scale. (Current -> Old; New -> Current)
-                 * Other reason why I put this, because this updating old info of Transform component, which makes the rendering good. (Or idk, *sparkle* MAGIC *sparkle*)
-                 */
+
                 transform.Scale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
             }
 
@@ -163,7 +159,7 @@ public class Renderer {
     }
 
     private Entity? GetUpwardConnection(Entity entity) {
-        ConnectionComponent? connection = entity.GetComponent<ConnectionComponent>();
+        ConnectionComponent? connection = entity.GetComponent<ConnectionComponent>(index: ConnectionComponent.ParentOf);
 
         if (connection == null || connection.Direction != ConnectionDir.UP) return null;
         return connection?.Attached;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Rendering;
+namespace Kinesis.Rendering;
 
 /// <summary>
 /// Represent a portion from the screen.

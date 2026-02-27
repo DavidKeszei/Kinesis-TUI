@@ -1,9 +1,9 @@
-﻿using Cuity.Rendering;
+﻿using Kinesis.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Represent a holder of changes on <see cref="Entity"/> instances.

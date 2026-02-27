@@ -1,11 +1,11 @@
-﻿using Cuity.Processing;
-using Cuity.Rendering;
-using Cuity.UI.Components;
+﻿using Kinesis.Processing;
+using Kinesis.Rendering;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Interacts, when a frame was rendered.
@@ -19,7 +19,7 @@ public class OnRenderUpdate: Entity {
     /// </summary>
     public Action<RenderMessage, PageEntityVisitor> On {
         set {
-            InteractionComponent? interaction = base.GetComponent<InteractionComponent>(0);
+            InteractionComponent? interaction = base.GetComponent<InteractionComponent>();
 
             if (interaction == null) {
                 interaction = new InteractionComponent(onRender: (message) => SetCallback(value, message), m_context, m_island);
@@ -36,9 +36,7 @@ public class OnRenderUpdate: Entity {
             ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
             connection?.Attached = value;
 
-            connection?.Attached.GetComponent<ConnectionComponent>()?
-                       .Attached = this;
-                       
+            value.GetComponent<ConnectionComponent>(index: ConnectionComponent.ParentOf)?.Attached = this;
         }
     }
 

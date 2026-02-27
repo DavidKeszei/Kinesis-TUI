@@ -1,10 +1,10 @@
-﻿using Cuity.UI;
-using Cuity.UI.Components;
+﻿using Kinesis.UI;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Rendering;
+namespace Kinesis.Rendering;
 
 /// <summary>
 /// Represent a helper component in the rendering.
@@ -15,7 +15,7 @@ public abstract class RenderComponent: IComponent, IStaticType {
     protected readonly Dictionary<StyleTag, IStyleComponent> m_cache = null!;
 
     protected int m_entityVersion = 0;
-    private volatile bool m_isDirty = true;
+    protected bool m_isDirty = true;
 
     /// <summary>
     /// Name of the <see cref="RenderComponent"/>.
@@ -34,8 +34,6 @@ public abstract class RenderComponent: IComponent, IStaticType {
 
     protected RenderComponent() 
         => m_cache = new Dictionary<StyleTag, IStyleComponent>();
-
-    public void UpdateComponent() => m_isDirty = true;
 
     /// <summary>
     /// Render the component to the screen.

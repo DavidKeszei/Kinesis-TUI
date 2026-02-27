@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Input;
+namespace Kinesis.Input;
 
 /// <summary>
 /// Provides low-latency input resolving on a platform.

@@ -1,10 +1,10 @@
-﻿using Cuity.Input;
-using Cuity.Processing;
+﻿using Kinesis.Input;
+using Kinesis.Processing;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI.Components;
+namespace Kinesis.UI.Components;
 
 /// <summary>
 /// Represent a interactive component on an <see cref="Entity"/>.

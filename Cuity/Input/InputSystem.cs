@@ -1,6 +1,6 @@
-﻿using Cuity.Processing;
-using Cuity.UI;
-using Cuity.UI.Components;
+﻿using Kinesis.Processing;
+using Kinesis.UI;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
-namespace Cuity.Input;
+namespace Kinesis.Input;
 
 /// <summary>
 /// Single input message from the standard input stream.

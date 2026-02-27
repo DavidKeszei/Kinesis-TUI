@@ -1,7 +1,6 @@
-﻿global using vtchar_t = Cuity.Rendering.VT100Char;
-using System.Runtime.InteropServices;
+﻿global using vtchar_t = Kinesis.Rendering.VT100Char;
 
-namespace Cuity.Rendering; 
+namespace Kinesis.Rendering; 
 
 /// <summary>
 /// Represent a VT100 emulated character on the screen.

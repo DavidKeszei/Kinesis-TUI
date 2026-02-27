@@ -1,12 +1,12 @@
-﻿using Cuity.Input;
-using Cuity.Processing;
-using Cuity.Rendering;
-using Cuity.UI.Components;
+﻿using Kinesis.Input;
+using Kinesis.Processing;
+using Kinesis.Rendering;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Interacts, when input was happened on the standard IO. 
@@ -37,7 +37,7 @@ public class OnInputUpdate: Entity {
             ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
             connection.Attached = value;
 
-            value.GetComponent<ConnectionComponent>()!.Attached = this;
+            value.GetComponent<ConnectionComponent>(index: ConnectionComponent.ParentOf)!.Attached = this;
         }
     }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Input;
+namespace Kinesis.Input;
 
 [Flags]
 public enum InputModifier: int {

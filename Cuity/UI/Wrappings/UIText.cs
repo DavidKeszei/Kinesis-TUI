@@ -1,10 +1,10 @@
-﻿using Cuity.Rendering;
-using Cuity.UI.Components;
+﻿using Kinesis.Rendering;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
 /// Represent a simple text on the screen.

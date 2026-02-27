@@ -2,19 +2,32 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Processing;
+namespace Kinesis.Processing;
 
+/// <summary>
+/// Represent current state of the rendering.
+/// </summary>
 public readonly record struct RenderMessage {
     private readonly float m_delta = .0f;
     private readonly int m_fps = 0;
 
     private readonly Vec2 m_scale = Vec2.Zero;
 
+    /// <summary>
+    /// Elapsed time from the previous frame.
+    /// </summary>
     public float DeltaTime { get => m_delta; }
 
+    /// <summary>
+    /// Current frame per second value.
+    /// </summary>
     public int FPS { get => m_fps; }
 
+    /// <summary>
+    /// Current scale of the rendering.
+    /// </summary>
     public Vec2 Scale { get => m_scale; }
+
 
     internal RenderMessage(float deltaTime, int fps, Vec2 scale) {
         m_delta = deltaTime;

@@ -1,9 +1,9 @@
-﻿using Cuity.UI;
+﻿using Kinesis.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.Navigation;
+namespace Kinesis.Navigation;
 
 /// <summary>
 /// Provides navigation between <see cref="Island"/> instances.

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 /// <summary>
-/// Provides component-like behaviour for an object. 
+/// Provides component-like behavior for an object. 
 /// </summary>
 public interface IComponent {
 

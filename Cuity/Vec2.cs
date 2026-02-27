@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity;
+namespace Kinesis;
 
 /// <summary>
 /// Represent a vector in the 2D space.

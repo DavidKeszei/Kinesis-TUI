@@ -1,19 +1,19 @@
-﻿using Cuity.Input;
-using Cuity.Navigation;
-using Cuity.Processing;
-using Cuity.Rendering;
-using Cuity.UI;
-using Cuity.UI.Components;
+﻿using Kinesis.Input;
+using Kinesis.Navigation;
+using Kinesis.Processing;
+using Kinesis.Rendering;
+using Kinesis.UI;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity;
+namespace Kinesis;
 
 /// <summary>
 /// Represent the heart of the library: This connects all systems to one class.
 /// </summary>
-public sealed class Engine: ISystemProvider {
+public sealed class KinesisEngine: ISystemProvider {
     private readonly Renderer m_renderer = null!;
     private readonly InputSystem m_input = null!;
 
@@ -23,9 +23,9 @@ public sealed class Engine: ISystemProvider {
     private readonly List<SystemInvocationInfo> m_customSystems = null!;
     
     /// <summary>
-    /// Create a new <see cref="Engine"/> instance.
+    /// Create a new <see cref="KinesisEngine"/> instance.
     /// </summary>
-    public Engine() {
+    public KinesisEngine() {
         m_renderer = new Renderer(scale: new Vec2(x: Console.BufferWidth, y: Console.BufferHeight));
         m_input = new InputSystem();
 
@@ -77,7 +77,7 @@ public sealed class Engine: ISystemProvider {
         => m_navigator.Register(name, pageCreation);
 
     /// <summary>
-    /// Start the <see cref="Engine"/> instance with the systems.
+    /// Start the <see cref="KinesisEngine"/> instance with the systems.
     /// </summary>
     public void Start(CancellationToken token = default) {
         bool firstRun = true;

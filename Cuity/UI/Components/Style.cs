@@ -1,11 +1,11 @@
-﻿using Cuity.Rendering;
+﻿using Kinesis.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Cuity.UI.Components;
+namespace Kinesis.UI.Components;
 
 /// <summary>
 /// Represent a style container component.

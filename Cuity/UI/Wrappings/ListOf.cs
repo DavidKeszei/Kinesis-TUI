@@ -1,9 +1,9 @@
-﻿using Cuity.UI.Components;
+﻿using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cuity.UI;
+namespace Kinesis.UI;
 
 public class ListOf: Entity {
 
