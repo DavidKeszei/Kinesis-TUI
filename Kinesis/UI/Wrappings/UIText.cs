@@ -40,7 +40,7 @@ public class UIText: Entity {
     /// <summary>
     /// Style indicators of the <see cref="UIText"/>.
     /// </summary>
-    public StyleFlag Attributes { get => base.GetComponent<Style>(2)!.AsAttribute; set => base.GetComponent<Style>(2)!.AsAttribute = value; }
+    public StyleFlag Styles { get => base.GetComponent<Style>(2)!.AsAttribute; set => base.GetComponent<Style>(2)!.AsAttribute = value; }
 
     public UIText() {
         base.AttachComponent<Transform>(new Transform() { Scale = new Vec2(x: 0, y: 1) }, isUnique: true);

@@ -73,7 +73,7 @@ public sealed class KinesisEngine: ISystemProvider {
     /// <param name="name">Name of the route.</param>
     /// <param name="pageCreation">Creation method of the <see cref="Island"/>.</param>
     /// <returns>Return <see langword="true"/>, if the route is successfully registered. Otherwise return <see langword="false"/>.</returns>
-    public bool AddPage<T>(string name, Func<ISystemProvider, T> pageCreation) where T: Island
+    public bool RegisterIsland<T>(string name, Func<ISystemProvider, T> pageCreation) where T: Island
         => m_navigator.Register(name, pageCreation);
 
     /// <summary>

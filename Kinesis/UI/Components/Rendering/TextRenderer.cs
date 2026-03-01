@@ -29,7 +29,7 @@ public class TextRenderer: RenderComponent {
         m_len = text.Length;
     }
 
-    internal override void Render(in Canvas buffer, int version, params IEnumerable<IStyleComponent> styles) {
+    internal override void Render(in Canvas buffer, int version, StyleEnumerator styles) {
         if (buffer.Scale.Y == 0 || buffer.Scale.X == 0)
             return;
 
@@ -72,7 +72,7 @@ public class TextRenderer: RenderComponent {
         m_entityVersion = version;
     }
 
-    protected override void CacheStyles(IEnumerable<IStyleComponent> styles) {
+    protected override void CacheStyles(StyleEnumerator styles) {
         m_cache.Clear();
         foreach(IStyleComponent style in styles) {
             

@@ -367,3 +367,6 @@ FodyWeavers.xsd
 /CuityTest/Program.cs
 /CuityTest/AppPage.cs
 /CuityTest/SimplePage.cs
+/KinesisViewer/KinesisViewer.csproj
+/KinesisViewer/Program.cs
+/KinesisViewer/App.cs

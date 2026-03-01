@@ -1,20 +1,20 @@
-﻿using System;
+﻿using Kinesis.UI.Components;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Kinesis.UI;
 
 /// <summary>
-/// Struct iterator for <see cref="IComponent"/> instances.
+/// Struct iterator for <typeparamref name="T"/> instances.
 /// </summary>
-public struct ComponentIterator {
-    private List<IComponent> m_components = null!;
+public ref struct ComponentIterator<T> where T: IComponent {
+    private readonly List<T> m_components = null!;
     private int m_current = -1;
 
-    public IComponent Current { get => m_components[m_current]; }
+    public readonly T Current { get => m_components[m_current]; }
 
-    public ComponentIterator(List<IComponent> components)
-        => m_components = components;
+    public ComponentIterator(List<T> components) => m_components = components;
 
     public bool MoveNext() {
         if (++m_current < m_components.Count)
@@ -22,4 +22,22 @@ public struct ComponentIterator {
 
         return false;
     }
+}
+
+public readonly ref struct StyleEnumerator {
+    private readonly ComponentIterator<IStyleComponent> m_styles = default!;
+
+    public StyleEnumerator(Entity entity) {
+        List<IStyleComponent> styles = new List<IStyleComponent>(capacity: 8);
+
+        foreach (IComponent component in entity) {
+
+            if (component.TypeOf(Style.Name))
+                styles.Add((Style)component);
+        }
+
+        m_styles = new ComponentIterator<IStyleComponent>(styles);
+    }
+
+    public ComponentIterator<IStyleComponent> GetEnumerator() => m_styles;
 }

@@ -7,7 +7,7 @@ namespace Kinesis.Processing;
 /// <summary>
 /// Represent current state of the rendering.
 /// </summary>
-public readonly record struct RenderMessage {
+public readonly record struct RenderMessage: IWorkMessage {
     private readonly float m_delta = .0f;
     private readonly int m_fps = 0;
 
@@ -28,6 +28,10 @@ public readonly record struct RenderMessage {
     /// </summary>
     public Vec2 Scale { get => m_scale; }
 
+    /// <summary>
+    /// Target callback type of the message.
+    /// </summary>
+    public static WorkMessageSource Target { get => WorkMessageSource.RENDERING; }
 
     internal RenderMessage(float deltaTime, int fps, Vec2 scale) {
         m_delta = deltaTime;

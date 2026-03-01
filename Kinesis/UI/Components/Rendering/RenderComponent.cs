@@ -40,13 +40,13 @@ public abstract class RenderComponent: IComponent, IStaticType {
     /// </summary>
     /// <param name="buffer">Portion of the screen buffer.</param>
     /// <param name="styles">Styles of the renderer.</param>
-    internal abstract void Render(in Canvas buffer, int version, params IEnumerable<IStyleComponent> styles);
+    internal abstract void Render(in Canvas buffer, int version, StyleEnumerator styles);
 
     /// <summary>
     /// Cache the required <see cref="IStyleComponent"/>s.
     /// </summary>
     /// <param name="styles">Non-filtered <see cref="IStyleComponent"/>s.</param>
-    protected abstract void CacheStyles(IEnumerable<IStyleComponent> styles);
+    protected abstract void CacheStyles(StyleEnumerator styles);
 
     public bool TypeOf(string type) => TYPE_NAME == type;
 }

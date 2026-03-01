@@ -22,7 +22,7 @@ public class ConnectionComponent: IComponent, IStaticType {
     /// <summary>
     /// Index of the parent on every <see cref="Entity"/> instance.
     /// </summary>
-    public static int ParentOf { get => 0; }
+    public static int Parent { get => 0; }
 
     /// <summary>
     /// Next <see cref="Entity"/> instance from this <see cref="Entity"/>.

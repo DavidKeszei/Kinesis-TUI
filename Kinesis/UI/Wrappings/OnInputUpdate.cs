@@ -37,7 +37,7 @@ public class OnInputUpdate: Entity {
             ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
             connection.Attached = value;
 
-            value.GetComponent<ConnectionComponent>(index: ConnectionComponent.ParentOf)!.Attached = this;
+            value.GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent)!.Attached = this;
         }
     }
 
