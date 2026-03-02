@@ -109,17 +109,6 @@ public class Entity {
         }
     }
 
-    public ComponentIterator GetEnumerator()
-        => new ComponentIterator(components: m_components);
-
-    /// <summary>
-    /// Resolve all <see cref="IStyleComponent"/> instances, which attached to the current instance.
-    /// </summary>
-    /// <returns>Return a <see cref="IEnumerable{T}"/> instance.</returns>
-    internal IEnumerable<IStyleComponent> ResolveStyles() {
-        foreach(IComponent component in m_components) {
-            if(component.TypeOf(type: Style.Name))
-                yield return ((Style)component);
-        }
-    }
+    public ComponentIterator<IComponent> GetEnumerator()
+        => new ComponentIterator<IComponent>(components: m_components);
 }

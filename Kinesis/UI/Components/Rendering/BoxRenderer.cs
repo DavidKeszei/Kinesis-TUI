@@ -14,7 +14,7 @@ public class BoxRenderer: RenderComponent {
     /// Render a box to the specific <paramref name="buffer"/> area.
     /// </summary>
     /// <param name="buffer">Target buffer of the rendering. This can be smaller, than the requested scale.</param>
-    internal override void Render(in Canvas buffer, int version, params IEnumerable<IStyleComponent> styles) {
+    internal override void Render(in Canvas buffer, int version, StyleEnumerator styles) {
         if(base.m_entityVersion != version) {
             m_entityVersion = version;
             CacheStyles(styles);
@@ -40,7 +40,7 @@ public class BoxRenderer: RenderComponent {
         }
     }
 
-    protected override void CacheStyles(IEnumerable<IStyleComponent> styles) {
+    protected override void CacheStyles(StyleEnumerator styles) {
         m_cache.Clear();
 
         foreach(IStyleComponent style in styles) {

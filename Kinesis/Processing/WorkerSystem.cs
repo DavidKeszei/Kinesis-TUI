@@ -13,6 +13,7 @@ namespace Kinesis.Processing;
 /// </summary>
 /// <param name="Action">Callback of the work.</param>
 /// <param name="Context">The context, which holds all changes on the entities.</param>
+/// <param name="Island">Container of the changed entities.</param>
 internal record WorkTarget(Delegate Action, EntityContext Context, Island Island);
 
 /// <summary>
@@ -57,7 +58,8 @@ internal class WorkerSystem: IDynamicSystem {
     /// </summary>
     /// <param name="work">Current work item.</param>
     /// <param name="context">Holds the changed entities.</param>
-    public void AddCallback<T>(Action<T> work, EntityContext context, Island island) => m_targets.Enqueue(new WorkTarget(work, context, island));
+    public void AddCallback<T>(Action<T> work, EntityContext context, Island island) where T: IWorkMessage
+        => m_targets.Enqueue(new WorkTarget(work, context, island));
 
     public void Run() {
         Thread.CurrentThread.Name = DEDICATED_THREAD_NAME;
@@ -69,7 +71,8 @@ internal class WorkerSystem: IDynamicSystem {
             }
 
             foreach (WorkTarget workUnit in m_targets) {
-                if (!workUnit.Island.IsActive) continue;
+                if (!workUnit.Island.IsActive || workUnit.Context.IsLocked())
+                    continue;
 
                 switch (message.Source) {
                     case WorkMessageSource.INPUT:
@@ -79,7 +82,7 @@ internal class WorkerSystem: IDynamicSystem {
                         break;
 
                     case WorkMessageSource.RENDERING:
-                        if (!workUnit.Context.IsLocked() && workUnit.Action is Action<RenderMessage> onRender)
+                        if (workUnit.Action is Action<RenderMessage> onRender)
                             onRender(message.Render);
 
                         break;

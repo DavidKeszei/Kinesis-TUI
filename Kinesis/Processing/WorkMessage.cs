@@ -42,7 +42,7 @@ internal readonly struct WorkMessage {
     }
 }
 
-internal enum WorkMessageSource: byte {
+public enum WorkMessageSource: byte {
     INPUT,
     RENDERING
 }

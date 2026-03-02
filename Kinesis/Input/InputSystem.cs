@@ -14,7 +14,7 @@ namespace Kinesis.Input;
 /// <summary>
 /// Single input message from the standard input stream.
 /// </summary>
-public readonly record struct InputMessage {
+public readonly record struct InputMessage: IWorkMessage {
     private readonly char m_key = '\0';
     private readonly InputModifier m_modifiers = InputModifier.NONE;
 
@@ -39,6 +39,11 @@ public readonly record struct InputMessage {
     /// Type of the input-action.
     /// </summary>
     public InputAction Action { get => m_action; }
+
+    /// <summary>
+    /// Target callback type of the message.
+    /// </summary>
+    public static WorkMessageSource Target { get => WorkMessageSource.INPUT; }
 
     /// <summary>Create a new <see cref="InputMessage"/>.</summary>
     /// <param name="key">Actual key value as <see cref="char"/>.</param>

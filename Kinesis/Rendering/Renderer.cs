@@ -2,6 +2,7 @@
 using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Kinesis.Rendering;
@@ -58,23 +59,28 @@ public class Renderer {
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
     public void Render(IReadOnlyList<Entity> entities) {
         DateTime start = DateTime.Now;
+        Transform previous = null!;
 
         for(int i = 0; i < entities.Count; ++i) {
-            Transform transform = entities[i].GetComponent<Transform>()!;
+            Transform? transform = entities[i].GetComponent<Transform>();
             RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
 
             /* The parent always connected with the first ConnectionComponent instance */
-            ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>(index: 0);
+            ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
 
-            if(entities[i].State == EntityState.LOCKED && renderLogic != null && renderLogic.IsDirty) {
+            if(entities[i].State == EntityState.LOCKED && renderLogic != null && transform != null && renderLogic.IsDirty) {
 
-                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
+                /* <ISSUE::RENDERING::WAIT_FOR_TEST> If two render object perfectly overlaps, then clear() deletes previous render object drawing. */
+                if(IsClearRequired(previous, transform))
+                    Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
+
                 Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
 
-                renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: entities[i].ResolveStyles());
+                renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: new StyleEnumerator(entities[i]));
                 renderLogic.IsDirty = false;
 
                 transform.Scale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
+                previous = transform;
             }
 
             entities[i].State = EntityState.FREE;
@@ -134,8 +140,8 @@ public class Renderer {
         for (int x = 0; x < canvas.Scale.X; ++x) {
             for (int y = 0; y < canvas.Scale.Y; ++y) {
                 ref vtchar_t px = ref canvas[x, y];
-                px.Clear();
 
+                px.Clear();
                 px.Background = bg;
             }
         }
@@ -145,7 +151,7 @@ public class Renderer {
         RGB rgb = RGB.Transparent;
         if (entity == null) return rgb;
 
-        foreach (IStyleComponent style in entity.ResolveStyles()) {
+        foreach (IStyleComponent style in new StyleEnumerator(entity)) {
             if (style.Tag == StyleTag.BACKGROUND)
                 return ((Style)style).AsRGB;
         }
@@ -159,9 +165,21 @@ public class Renderer {
     }
 
     private Entity? GetUpwardConnection(Entity entity) {
-        ConnectionComponent? connection = entity.GetComponent<ConnectionComponent>(index: ConnectionComponent.ParentOf);
+        ConnectionComponent? connection = entity.GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
 
         if (connection == null || connection.Direction != ConnectionDir.UP) return null;
         return connection?.Attached;
+    }
+
+    /// <summary>
+    /// Indicates if clearing is required on the screen.
+    /// </summary>
+    /// <param name="previous">Previous <see cref="Transform"/> in the Z-index list.</param>
+    /// <param name="current">Current <see cref="Transform"/> of the render object.</param>
+    /// <returns>Return <see langword="true"/>, if the two <see cref="Transform"/> is equal in old-state term. Otherwise return <see langword="false"/>.</returns>
+    /// <remarks><b>Remark:</b> This eliminate the not required clear, because in the Z-index list someone always clearing if this necessary.</remarks>
+    private bool IsClearRequired(Transform previous, Transform current) {
+        if (previous == null) return true;
+        return previous.OldScale != current.OldScale && previous.OldPosition != current.OldPosition;
     }
 }
