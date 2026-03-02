@@ -370,3 +370,5 @@ FodyWeavers.xsd
 /KinesisViewer/KinesisViewer.csproj
 /KinesisViewer/Program.cs
 /KinesisViewer/App.cs
+/KinesisExample/KinesisExample.csproj
+/KinesisExample/Program.cs
