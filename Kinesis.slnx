@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="Cuity/Kinesis.csproj" />
-  <Project Path="CuityTest/CuityTest.csproj" Id="ed6c9ea6-3435-4863-83c7-744f613cd3d8" />
+  <Project Path="Kinesis/Kinesis.csproj" />
 </Solution>
