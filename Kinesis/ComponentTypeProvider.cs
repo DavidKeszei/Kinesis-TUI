@@ -6,7 +6,7 @@ using System.Text;
 namespace Kinesis;
 
 /// <summary>
-/// Represent a simple registry for <see cref="IComponent"/> instances.
+/// Represent a simple registry for <see cref="Component"/> instances.
 /// </summary>
 internal static class ComponentTypeProvider {
     private static readonly Dictionary<string, int> m_registeredComponents = null!;
@@ -14,7 +14,7 @@ internal static class ComponentTypeProvider {
     static ComponentTypeProvider()
         => m_registeredComponents = new Dictionary<string, int>();
 
-    internal static bool RegisterComponent<T>(string name) where T : IComponent 
+    internal static bool RegisterComponent<T>(string name) where T : Component 
         => m_registeredComponents.TryAdd(key: name, value: m_registeredComponents.Count);
 
     internal static int QueryComponent(string name) {

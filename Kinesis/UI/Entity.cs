@@ -11,7 +11,7 @@ namespace Kinesis.UI;
 /// Represent a plain, tagged instance of the library.
 /// </summary>
 public class Entity {
-    private readonly List<IComponent> m_components = null!;
+    private readonly List<Component> m_components = null!;
     private readonly Dictionary<int, int> m_uniqueComponents = null!;
 
     private readonly string m_name = string.Empty;
@@ -41,7 +41,7 @@ public class Entity {
     public Entity() {
         m_version = 0;
 
-        m_components = new List<IComponent>();
+        m_components = new List<Component>();
         m_uniqueComponents = new Dictionary<int, int>();
     }
 
@@ -52,7 +52,7 @@ public class Entity {
     /// <param name="component">Pre-defined value of the component. If this <see langword="null"/>, then the system creates a default component.</param>
     /// <param name="isUnique">Indicates the component is unique on the <see cref="Entity"/>.</param>
     /// <returns>Return <see langword="true"/> if the component is added to the entity. Otherwise return <see langword="false"/>.</returns>
-    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: class, IComponent, IStaticType {
+    public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: Component, IStaticType {
         if (component == null) return false;
         if(isUnique || component.TypeOf(type: RenderComponent.Name)) {
             if(!m_uniqueComponents.TryAdd(ComponentTypeProvider.QueryComponent(name: T.Name), m_components.Count))
@@ -71,12 +71,12 @@ public class Entity {
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <param name="index">Indicates, which component we wan't from the type. (Example: if the index = 1, then return second component of the <typeparamref name="T"/>.)</param>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
-    public virtual T? GetComponent<T>(int index = 0) where T: class, IComponent, IStaticType {
+    public virtual T? GetComponent<T>(int index = 0) where T: Component, IStaticType {
         if (m_uniqueComponents.TryGetValue(ComponentTypeProvider.QueryComponent(T.Name), out int i))
             return (T)m_components[i];
 
         int current = 0;
-        foreach (IComponent component in m_components) {
+        foreach (Component component in m_components) {
             if (component.TypeOf(T.Name) && current++ == index)
                 return component as T;
         }
@@ -89,7 +89,7 @@ public class Entity {
     /// </summary>
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <param name="index">Indicates where we want delete the component.</param>
-    public void RemoveComponent<T>(int index = 0) where T: class, IComponent, IStaticType {
+    public void RemoveComponent<T>(int index = 0) where T: Component, IStaticType {
         if (m_uniqueComponents.TryGetValue(key: ComponentTypeProvider.QueryComponent(name: T.Name), out int i)) {
             m_components.RemoveAt(i);
             m_uniqueComponents.Remove(key: ComponentTypeProvider.QueryComponent(name: T.Name));
@@ -100,7 +100,7 @@ public class Entity {
 
         int indexOf = 0;
 
-        foreach (IComponent component in m_components) {
+        foreach (Component component in m_components) {
             if (component.TypeOf(type: T.Name) && ++indexOf == index) {
                 m_components.RemoveAt(index);
                 ++m_version;
@@ -109,6 +109,6 @@ public class Entity {
         }
     }
 
-    public ComponentIterator<IComponent> GetEnumerator()
-        => new ComponentIterator<IComponent>(components: m_components);
+    public ComponentIterator<Component> GetEnumerator()
+        => new ComponentIterator<Component>(components: m_components);
 }

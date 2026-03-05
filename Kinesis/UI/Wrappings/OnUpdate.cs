@@ -1,8 +1,10 @@
-﻿using Kinesis.Processing;
+﻿using Kinesis.Input;
+using Kinesis.Processing;
 using Kinesis.Rendering;
 using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Kinesis.UI;
@@ -10,26 +12,30 @@ namespace Kinesis.UI;
 /// <summary>
 /// Interacts, when a frame was rendered.
 /// </summary>
-public class OnRenderUpdate: Entity {
+public class OnUpdate<T>: Entity where T: IWorkMessage {
     private readonly EntityContext m_context = null!;
     private readonly Island m_island = null!;
 
     /// <summary>
     /// Callback, when a frame was rendered.
     /// </summary>
-    public Action<RenderMessage, PageEntityVisitor> On {
+    public Action<T, PageEntityVisitor> On {
         set {
             InteractionComponent? interaction = base.GetComponent<InteractionComponent>();
 
             if (interaction == null) {
-                interaction = new InteractionComponent(onRender: (message) => SetCallback(value, message), m_context, m_island);
+                interaction = T.Target switch {
+                    WorkMessageSource.RENDERING => new InteractionComponent(onRender: (message) => SetCallback(value, Unsafe.As<RenderMessage, T>(ref message)), m_context, m_island),
+                    WorkMessageSource.INPUT => new InteractionComponent(onInput: (message) => SetCallback(value, Unsafe.As<InputMessage, T>(ref message)), m_context, m_island),
+                    _ => null!
+                };
                 base.AttachComponent<InteractionComponent>(interaction, isUnique: true);
             }
         }
     }
 
     /// <summary>
-    /// Attached child of the <see cref="OnRenderUpdate"/>.
+    /// Attached child of the <see cref="OnUpdate"/>.
     /// </summary>
     public Entity Child {
         set {
@@ -40,7 +46,7 @@ public class OnRenderUpdate: Entity {
         }
     }
 
-    public OnRenderUpdate(Island island) {
+    public OnUpdate(Island island) {
         base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.UP });
         base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.DOWN });
 
@@ -48,7 +54,7 @@ public class OnRenderUpdate: Entity {
         this.m_context = new EntityContext();
     }
 
-    private void SetCallback(Action<RenderMessage, PageEntityVisitor> func, RenderMessage message) {
+    private void SetCallback(Action<T, PageEntityVisitor> func, T message) {
         m_context.Reset();
         func(message, new PageEntityVisitor(this, m_context));
         m_context.Lockdown();

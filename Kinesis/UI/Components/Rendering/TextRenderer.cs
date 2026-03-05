@@ -36,9 +36,9 @@ public class TextRenderer: RenderComponent {
         if(m_entityVersion != version)
             CacheStyles(styles);
 
-        IStyleComponent? bg = null!;
-        IStyleComponent? fg = null!;
-        IStyleComponent? attr = null!;
+        Style? bg = null!;
+        Style? fg = null!;
+        Style? attr = null!;
 
         bool isMissing = (!m_cache.TryGetValue(key: StyleTag.BACKGROUND, out bg) && !bg!.TypeOf(Style.Name)) ||
                          (!m_cache.TryGetValue(key: StyleTag.FOREGROUND, out fg) && !fg!.TypeOf(Style.Name));
@@ -74,7 +74,7 @@ public class TextRenderer: RenderComponent {
 
     protected override void CacheStyles(StyleEnumerator styles) {
         m_cache.Clear();
-        foreach(IStyleComponent style in styles) {
+        foreach(Style style in styles) {
             
             switch(style.Tag) {
                 case StyleTag.FOREGROUND:

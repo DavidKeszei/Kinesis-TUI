@@ -151,7 +151,7 @@ public class Renderer {
         RGB rgb = RGB.Transparent;
         if (entity == null) return rgb;
 
-        foreach (IStyleComponent style in new StyleEnumerator(entity)) {
+        foreach (Style style in new StyleEnumerator(entity)) {
             if (style.Tag == StyleTag.BACKGROUND)
                 return ((Style)style).AsRGB;
         }

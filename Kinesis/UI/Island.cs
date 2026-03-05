@@ -63,7 +63,7 @@ public abstract class Island {
             return 0;
 
         int count = 0;
-        foreach (IComponent component in entity) {
+        foreach (Component component in entity) {
             if (component.TypeOf(ConnectionComponent.Name))
                 ++count;
         }

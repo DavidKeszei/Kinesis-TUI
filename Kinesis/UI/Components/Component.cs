@@ -5,14 +5,20 @@ using System.Text;
 namespace Kinesis.UI;
 
 /// <summary>
-/// Provides component-like behavior for an object. 
+/// Base class of component-like object.
 /// </summary>
-public interface IComponent {
+public abstract class Component {
+    private readonly int m_id = -1;
+
+    protected Component(int id) => m_id = id;
 
     /// <summary>
     /// Check if the component static type name is equal with <paramref name="type"/>.
     /// </summary>
     /// <param name="type">Type name of the component.</param>
     /// <returns>Return <see langword="true"/>, if the <paramref name="type"/> is equal with the underlying name. Otherwise return <see langword="false"/>.</returns>
-    public bool TypeOf(string type);
+    public bool TypeOf(string type) {
+        if (string.IsNullOrEmpty(type)) return false;
+        return m_id == ComponentTypeProvider.QueryComponent(name: type);
+    }
 }

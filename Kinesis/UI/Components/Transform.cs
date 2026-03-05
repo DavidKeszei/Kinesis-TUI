@@ -7,7 +7,7 @@ namespace Kinesis.UI.Components;
 /// <summary>
 /// Represent a component, which contains the transform of a <see cref="Entity"/>.
 /// </summary>
-public class Transform: IComponent, IStaticType {
+public class Transform: Component, IStaticType {
     private const string TYPE_NAME = "Transform";
 
     private Vec2 m_position = Vec2.Zero;
@@ -43,8 +43,6 @@ public class Transform: IComponent, IStaticType {
         }
     }
 
-    public bool TypeOf(string type) => TYPE_NAME == type;
-
     /// <summary>
     /// Old position of the <see cref="Transform"/> component.
     /// </summary>
@@ -54,4 +52,6 @@ public class Transform: IComponent, IStaticType {
     /// Old scale of the <see cref="Transform"/> component.
     /// </summary>
     internal Vec2 OldScale { get => m_oldScale; }
+
+    public Transform(): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) { }
 }

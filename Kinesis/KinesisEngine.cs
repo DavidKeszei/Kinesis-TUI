@@ -56,7 +56,7 @@ public sealed class KinesisEngine: ISystemProvider {
         return default!;
     }
 
-    public bool RegisterComponent<T>() where T: class, IComponent, IStaticType
+    public bool RegisterComponent<T>() where T: Component, IStaticType
         => ComponentTypeProvider.RegisterComponent<T>(name: T.Name);
 
     /// <summary>

@@ -8,7 +8,7 @@ namespace Kinesis.UI;
 /// <summary>
 /// Struct iterator for <typeparamref name="T"/> instances.
 /// </summary>
-public ref struct ComponentIterator<T> where T: IComponent {
+public ref struct ComponentIterator<T> where T: Component {
     private readonly List<T> m_components = null!;
     private int m_current = -1;
 
@@ -25,19 +25,19 @@ public ref struct ComponentIterator<T> where T: IComponent {
 }
 
 public readonly ref struct StyleEnumerator {
-    private readonly ComponentIterator<IStyleComponent> m_styles = default!;
+    private readonly ComponentIterator<Style> m_styles = default!;
 
     public StyleEnumerator(Entity entity) {
-        List<IStyleComponent> styles = new List<IStyleComponent>(capacity: 8);
+        List<Style> styles = new List<Style>(capacity: 8);
 
-        foreach (IComponent component in entity) {
+        foreach (Component component in entity) {
 
             if (component.TypeOf(Style.Name))
                 styles.Add((Style)component);
         }
 
-        m_styles = new ComponentIterator<IStyleComponent>(styles);
+        m_styles = new ComponentIterator<Style>(styles);
     }
 
-    public ComponentIterator<IStyleComponent> GetEnumerator() => m_styles;
+    public ComponentIterator<Style> GetEnumerator() => m_styles;
 }

@@ -10,7 +10,7 @@ namespace Kinesis.UI.Components;
 /// <summary>
 /// Represent a style container component.
 /// </summary>
-public class Style: IStyleComponent, IStaticType {
+public class Style: Component, IStaticType {
     private const string TYPE_NAME = "Style";
     private StyleGenericUnion m_union = default;
 
@@ -39,17 +39,17 @@ public class Style: IStyleComponent, IStaticType {
     /// </summary>
     public StyleFlag AsAttribute { get => m_union.GetVT100Attr();  set => m_union.SetVT100Attr(value); }
 
-    private Style(StyleTag tag, RGB color) {
+    private Style(StyleTag tag, RGB color): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetRGB(color);
     }
 
-    private Style(StyleTag tag, int value) {
+    private Style(StyleTag tag, int value): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetInteger(value);
     }
 
-    private Style(StyleTag tag, StyleFlag flag) {
+    private Style(StyleTag tag, StyleFlag flag): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetVT100Attr(flag);
     }
@@ -77,8 +77,6 @@ public class Style: IStyleComponent, IStaticType {
     /// <param name="flag">The color value itself.</param>
     /// <returns>Return a <see cref="Style"/> instance.</returns>
     public static Style CreateFromAttributes(StyleTag tag, StyleFlag flag) => new Style(tag, flag);
-
-    public bool TypeOf(string type) => TYPE_NAME == type;
 }
 
 /// <summary>

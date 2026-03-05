@@ -8,10 +8,12 @@ namespace Kinesis.UI.Components;
 /// <summary>
 /// Represent a component, which can hold a <typeparamref name="T"/> instance.
 /// </summary>
-public class ConnectionComponent: IComponent, IStaticType {
+public class ConnectionComponent: Component, IStaticType {
     private const string TYPE_NAME = "ConnectionComponent";
 
     private Entity m_child = null!;
+
+    private int m_flatIndex = -1;
     private ConnectionDir m_direction = ConnectionDir.DOWN;
 
     /// <summary>
@@ -34,7 +36,12 @@ public class ConnectionComponent: IComponent, IStaticType {
     /// </summary>
     public ConnectionDir Direction { get => m_direction; init => m_direction = value; }
 
-    public bool TypeOf(string type) => TYPE_NAME == type;
+    /// <summary>
+    /// Indicates the position of the connection in the "render-set".
+    /// </summary>
+    internal int FlatIndex { get => m_flatIndex; set => m_flatIndex = value; }
+
+    public ConnectionComponent(): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) { }
 }
 
 public enum ConnectionDir: byte {
