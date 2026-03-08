@@ -19,7 +19,7 @@ public interface INavigator: ISystem {
     /// <summary>
     /// Navigate to a <see cref="Island"/> based on the <paramref name="name"/>.
     /// </summary>
-    /// <param name="name">Name of the regitered <see cref="Island"/>.</param>
+    /// <param name="name">Name of the registered <see cref="Island"/>.</param>
     public void NavigateTo(string name);
 
     /// <summary>

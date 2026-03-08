@@ -1,4 +1,5 @@
-﻿using Kinesis.UI;
+﻿using Kinesis.Processing;
+using Kinesis.UI;
 using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ public class Renderer {
     public float FrameTime { get => m_currentFrameTime / 1000f; }
 
     /// <summary>
-    /// Create a new <see cref="Renderer"/> instance with specific <paramref name="x"/> and <paramref name="y"/> scale.
+    /// Create a new <see cref="Renderer"/> instance with specific <paramref name="scale"/>.
     /// </summary>
     /// <param name="scale">Scale of the console screen.</param>
     public Renderer(Vec2 scale) {
@@ -59,31 +60,24 @@ public class Renderer {
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
     public void Render(IReadOnlyList<Entity> entities) {
         DateTime start = DateTime.Now;
-        Transform previous = null!;
 
-        for(int i = 0; i < entities.Count; ++i) {
+        for (int i = 0; i < entities.Count; ++i) {
             Transform? transform = entities[i].GetComponent<Transform>();
             RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
 
             /* The parent always connected with the first ConnectionComponent instance */
             ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
 
-            if(entities[i].State == EntityState.LOCKED && renderLogic != null && transform != null && renderLogic.IsDirty) {
-
-                /* <ISSUE::RENDERING::WAIT_FOR_TEST> If two render object perfectly overlaps, then clear() deletes previous render object drawing. */
-                if(IsClearRequired(previous, transform))
-                    Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
-
+            if (renderLogic != null && transform != null && renderLogic.IsDirty) {
+                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
                 Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
 
                 renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: new StyleEnumerator(entities[i]));
                 renderLogic.IsDirty = false;
 
-                transform.Scale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
-                previous = transform;
+                transform.OldScale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
+                transform.OldPosition = transform.Position;
             }
-
-            entities[i].State = EntityState.FREE;
         }
 
         Diffing();

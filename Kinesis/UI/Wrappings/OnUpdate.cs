@@ -13,7 +13,6 @@ namespace Kinesis.UI;
 /// Interacts, when a frame was rendered.
 /// </summary>
 public class OnUpdate<T>: Entity where T: IWorkMessage {
-    private readonly EntityContext m_context = null!;
     private readonly Island m_island = null!;
 
     /// <summary>
@@ -25,8 +24,8 @@ public class OnUpdate<T>: Entity where T: IWorkMessage {
 
             if (interaction == null) {
                 interaction = T.Target switch {
-                    WorkMessageSource.RENDERING => new InteractionComponent(onRender: (message) => SetCallback(value, Unsafe.As<RenderMessage, T>(ref message)), m_context, m_island),
-                    WorkMessageSource.INPUT => new InteractionComponent(onInput: (message) => SetCallback(value, Unsafe.As<InputMessage, T>(ref message)), m_context, m_island),
+                    WorkMessageSource.RENDERING => new InteractionComponent(onRender: (message) => SetCallback(value, Unsafe.As<RenderMessage, T>(ref message)), m_island),
+                    WorkMessageSource.INPUT => new InteractionComponent(onInput: (message) => SetCallback(value, Unsafe.As<InputMessage, T>(ref message)), m_island),
                     _ => null!
                 };
                 base.AttachComponent<InteractionComponent>(interaction, isUnique: true);
@@ -51,12 +50,9 @@ public class OnUpdate<T>: Entity where T: IWorkMessage {
         base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.DOWN });
 
         this.m_island = island;
-        this.m_context = new EntityContext();
     }
 
     private void SetCallback(Action<T, PageEntityVisitor> func, T message) {
-        m_context.Reset();
-        func(message, new PageEntityVisitor(this, m_context));
-        m_context.Lockdown();
+        func(message, new PageEntityVisitor(this));
     }
 }

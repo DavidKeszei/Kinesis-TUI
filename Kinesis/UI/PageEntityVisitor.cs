@@ -1,4 +1,5 @@
-﻿using Kinesis.UI.Components;
+﻿using Kinesis.Rendering;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,12 +11,8 @@ namespace Kinesis.UI;
 /// </summary>
 public readonly ref struct PageEntityVisitor {
     private readonly Entity? m_pivot = null!;
-    private readonly EntityContext m_ctx = null!;
 
-    internal PageEntityVisitor(Entity? pivot, EntityContext changeContext) {
-        m_ctx = changeContext;
-        m_pivot = pivot;
-    }
+    internal PageEntityVisitor(Entity? pivot) => m_pivot = pivot;
 
     /// <summary>
     /// Visit a specific <typeparamref name="T"/> entity in the tree.
@@ -29,7 +26,11 @@ public readonly ref struct PageEntityVisitor {
         else if (IsSequenceEqual(m_pivot.Name, name) && m_pivot is T ret) return ret;
 
         Entity? result = RecursiveVisit(current: m_pivot, name);
-        if (result != null && track) m_ctx.Add(result);
+
+        if (result != null && track) {
+            RenderComponent? render = result.GetComponent<RenderComponent>();
+            render?.IsDirty = true;
+        }
 
         return (T?)result;
     }

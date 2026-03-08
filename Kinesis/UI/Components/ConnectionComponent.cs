@@ -6,14 +6,13 @@ using System.Text;
 namespace Kinesis.UI.Components;
 
 /// <summary>
-/// Represent a component, which can hold a <typeparamref name="T"/> instance.
+/// Represent connection information between two or more <see cref="Entity"/> instances.
 /// </summary>
 public class ConnectionComponent: Component, IStaticType {
     private const string TYPE_NAME = "ConnectionComponent";
+    private const int PARENT_INDEX = 0;
 
     private Entity m_child = null!;
-
-    private int m_flatIndex = -1;
     private ConnectionDir m_direction = ConnectionDir.DOWN;
 
     /// <summary>
@@ -24,7 +23,7 @@ public class ConnectionComponent: Component, IStaticType {
     /// <summary>
     /// Index of the parent on every <see cref="Entity"/> instance.
     /// </summary>
-    public static int Parent { get => 0; }
+    public static int Parent { get => PARENT_INDEX; }
 
     /// <summary>
     /// Next <see cref="Entity"/> instance from this <see cref="Entity"/>.
@@ -35,11 +34,6 @@ public class ConnectionComponent: Component, IStaticType {
     /// Direction of the current connection in the hierarchy.
     /// </summary>
     public ConnectionDir Direction { get => m_direction; init => m_direction = value; }
-
-    /// <summary>
-    /// Indicates the position of the connection in the "render-set".
-    /// </summary>
-    internal int FlatIndex { get => m_flatIndex; set => m_flatIndex = value; }
 
     public ConnectionComponent(): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) { }
 }

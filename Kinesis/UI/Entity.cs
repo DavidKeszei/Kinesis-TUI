@@ -11,13 +11,11 @@ namespace Kinesis.UI;
 /// Represent a plain, tagged instance of the library.
 /// </summary>
 public class Entity {
-    private readonly List<Component> m_components = null!;
     private readonly Dictionary<int, int> m_uniqueComponents = null!;
+    private readonly List<Component> m_components = null!;
 
     private readonly string m_name = string.Empty;
     private int m_version = 0;
-
-    private EntityState m_state = EntityState.LOCKED;
 
     /// <summary>
     /// Version of the entity.
@@ -28,11 +26,6 @@ public class Entity {
     /// Name of the entity.
     /// </summary>
     public string Name { get => m_name; init => m_name = value; }
-
-    /// <summary>
-    /// Indicates the <see cref="Entity"/> is lock state by the <see cref="Renderer"/>.
-    /// </summary>
-    internal EntityState State { get => m_state; set => m_state = value; }
 
     /// <summary>
     /// Create a new <see cref="Entity"/> with specific name.

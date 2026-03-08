@@ -21,6 +21,7 @@ public sealed class KinesisEngine: ISystemProvider {
     private readonly NavigationSystem m_navigator = null!;
 
     private readonly List<SystemInvocationInfo> m_customSystems = null!;
+    private readonly State<WorkerSystemState> m_workSyncState = null!;
     
     /// <summary>
     /// Create a new <see cref="KinesisEngine"/> instance.
@@ -33,13 +34,14 @@ public sealed class KinesisEngine: ISystemProvider {
         m_navigator = new NavigationSystem(provider: this);
 
         m_customSystems = new List<SystemInvocationInfo>();
-        RegisterBuiltInComponents();
+        m_workSyncState = new ValueState<WorkerSystemState>(@default: WorkerSystemState.WAIT_FOR_RENDERER);
 
         Console.InputEncoding = Encoding.UTF8;
         Console.OutputEncoding = Encoding.UTF8;
 
         /* Make sure the NavigatorSystem is can be queried */
         m_customSystems.Add(new SystemInvocationInfo(null!, m_navigator, SystemInvocationTime.ON_CALL));
+        RegisterBuiltInComponents();
     }
 
     public T? GetSystem<T>() where T: class, ISystem {
@@ -84,6 +86,7 @@ public sealed class KinesisEngine: ISystemProvider {
 
         /* Run the starter systems. */
         Run(invocation: SystemInvocationTime.ON_BEGIN);
+        WorkerSystem.Current.AddSyncState(sync: m_workSyncState);
 
         /* Start main parts of the engine on different threads. (Input, Workers) */
         _ = Task.Run(action: () => m_worker.Run(), token);
@@ -91,7 +94,11 @@ public sealed class KinesisEngine: ISystemProvider {
 
         while(!token.IsCancellationRequested) {
             /* Render the frame to the screen/terminal window. */
-            m_renderer.Render(entities: m_navigator.Current?.Tree ?? []);
+            if (m_workSyncState == WorkerSystemState.WAIT_FOR_RENDERER) {
+
+                m_renderer.Render(entities: m_navigator.Current?.Tree ?? []);
+                m_workSyncState.Value = WorkerSystemState.OPEN_FOR_PROCESSING;
+            }
 
             if (!firstRun) m_worker.AddRenderMessage(new RenderMessage(m_renderer.FrameTime, (int)m_renderer.FPS, m_renderer.Scale));
             else firstRun = false;

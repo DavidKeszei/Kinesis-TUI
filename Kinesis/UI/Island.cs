@@ -13,6 +13,8 @@ namespace Kinesis.UI;
 /// </summary>
 public abstract class Island {
     private readonly List<Entity> m_renderSet = null!;
+    private int m_currentEntityIndex = 0;
+
     private bool m_isActive = false;
 
     /// <summary>
@@ -44,17 +46,20 @@ public abstract class Island {
     /// Move through the tree and create list from it.
     /// </summary>
     /// <param name="entity">Current target entity of the call.</param>
-    internal void CreateRenderSet(Entity? entity = null!) {
-        entity ??= Build();
+    internal void CreateRenderSet(Entity? entity = null!, bool isTop = true) {
+        if(isTop) entity ??= Build();
+        if(entity == null) return;
 
-        m_renderSet.Add(entity!);
+        bool isRenderable = entity.GetComponent<RenderComponent>() != null;
+        if (isRenderable) m_renderSet.Add(entity!);
+
         int childrenCount = CountOfChild(entity);
 
         for (int i = 1; i < childrenCount; ++i) {
             ConnectionComponent child = entity!.GetComponent<ConnectionComponent>(i)!;
 
             if(child.Attached != null) 
-                CreateRenderSet(entity: child.Attached);
+                CreateRenderSet(entity: child.Attached, isTop: false);
         }
     }
 
