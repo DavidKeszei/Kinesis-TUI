@@ -60,10 +60,10 @@ internal readonly struct ConsoleBuffer {
     /// <returns>Return a <see cref="Canvas"/> instance.</returns>
     public static Canvas Slice(ref ConsoleBuffer buffer, Vec2 from, Vec2 scale) {
         if (from.X < 0) scale.X += from.X;
-        else if (from.X + scale.X >= buffer.Dimension.X) scale.X -= (from.X + scale.X) % buffer.Dimension.X;
+        else if (from.X + scale.X >= buffer.Dimension.X) scale.X = buffer.Dimension.X - from.X;
 
         if (from.Y < 0) scale.Y += from.Y;
-        else if (from.Y + scale.Y >= buffer.Dimension.Y) scale.Y -= (from.Y + scale.Y) % buffer.Dimension.Y;
+        else if (from.Y + scale.Y >= buffer.Dimension.Y) scale.Y = buffer.Dimension.Y - from.Y;
 
         from.X = float.Clamp(from.X, 0, buffer.Dimension.X - 1);
         from.Y = float.Clamp(from.Y, 0, buffer.Dimension.Y - 1);

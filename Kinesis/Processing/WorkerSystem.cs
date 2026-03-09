@@ -22,7 +22,7 @@ internal class WorkerSystem: IDynamicSystem {
     private const string DEDICATED_THREAD_NAME = "<Thread> Worker";
     private const string ERR_SYNC_NOT_FOUND = "The synchronization context/state wasn't found.";
 
-    private const int MAX_RENDER_MSG = 120;
+    private const int MAX_RENDER_MSG = 1;
 
     private static WorkerSystem m_instance = null!;
 
@@ -96,7 +96,7 @@ internal class WorkerSystem: IDynamicSystem {
             foreach (WorkTarget workUnit in m_targets) {
                 if (!workUnit.Island.IsActive)
                     continue;
-
+                    
                 switch (message.Source) {
                     case WorkMessageSource.INPUT:
                         if(workUnit.Action is Action<InputMessage> onInput)

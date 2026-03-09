@@ -26,8 +26,10 @@ public sealed class KinesisEngine: ISystemProvider {
     /// <summary>
     /// Create a new <see cref="KinesisEngine"/> instance.
     /// </summary>
-    public KinesisEngine() {
-        m_renderer = new Renderer(scale: new Vec2(x: Console.BufferWidth, y: Console.BufferHeight));
+    public KinesisEngine(string? title = null!, int x = -1, int y = -1) {
+        Console.Out.Write(title == null ? $"\e]0;KinesisTUI\a" : $"\e]0;{title}\a");
+
+        m_renderer = new Renderer(scale: new Vec2(x == -1 ? Console.BufferWidth : x, y == -1 ? Console.BufferHeight : y));
         m_input = new InputSystem();
 
         m_worker = WorkerSystem.Current;
