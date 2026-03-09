@@ -58,29 +58,35 @@ public class Renderer {
     /// Render one frame to the screen.
     /// </summary>
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
-    public void Render(IReadOnlyList<Entity> entities) {
+    public void Render(IReadOnlyList<Entity> entities, State<WorkerSystemState> sync) {
         DateTime start = DateTime.Now;
 
-        for (int i = 0; i < entities.Count; ++i) {
-            Transform? transform = entities[i].GetComponent<Transform>();
-            RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
+        if (sync == WorkerSystemState.WAIT_FOR_RENDERER) {
+            for (int i = 0; i < entities.Count; ++i) {
+                Transform? transform = entities[i].GetComponent<Transform>();
+                RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
 
-            /* The parent always connected with the first ConnectionComponent instance */
-            ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
+                /* The parent always connected with the first ConnectionComponent instance */
+                ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
 
-            if (renderLogic != null && transform != null && renderLogic.IsDirty) {
-                Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
-                Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
+                if (renderLogic != null && transform != null && renderLogic.IsDirty) {
+                    Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
+                    Canvas canvas = ConsoleBuffer.Slice(buffer: ref m_backBuffer, transform.Position, transform.Scale);
 
-                renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles: new StyleEnumerator(entities[i]));
-                renderLogic.IsDirty = false;
+                    using StyleEnumerator styles = new StyleEnumerator(entities[i]);
+                    renderLogic.Render(buffer: in canvas, version: entities[i].Version, styles);
 
-                transform.OldScale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
-                transform.OldPosition = transform.Position;
+                    renderLogic.IsDirty = false;
+
+                    transform.OldScale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
+                    transform.OldPosition = transform.Position;
+                }
             }
+
+            Diffing();
+            sync.Value = WorkerSystemState.OPEN_FOR_PROCESSING;
         }
 
-        Diffing();
         m_currentFrameTime = (float)(DateTime.Now - start).TotalMilliseconds;
 
         if (m_currentFrameTime < MAX_FPS) {
@@ -145,7 +151,8 @@ public class Renderer {
         RGB rgb = RGB.Transparent;
         if (entity == null) return rgb;
 
-        foreach (Style style in new StyleEnumerator(entity)) {
+        using StyleEnumerator styles = new StyleEnumerator(entity);
+        foreach (Style style in styles) {
             if (style.Tag == StyleTag.BACKGROUND)
                 return ((Style)style).AsRGB;
         }
