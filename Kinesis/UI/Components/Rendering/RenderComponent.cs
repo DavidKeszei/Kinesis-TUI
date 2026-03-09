@@ -23,7 +23,7 @@ public abstract class RenderComponent: Component, IStaticType {
     public static string Name { get => TYPE_NAME; }
 
     /// <summary>
-    /// Version of the entity, which target of the <see cref="RenderComponent"/>.
+    /// Version of the entity, which targeting the current <see cref="RenderComponent"/>.
     /// </summary>
     internal int EntityVersion { get => m_entityVersion; set => m_entityVersion = value; }
 

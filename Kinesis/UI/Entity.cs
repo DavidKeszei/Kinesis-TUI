@@ -17,6 +17,8 @@ public class Entity {
     private readonly string m_name = string.Empty;
     private int m_version = 0;
 
+    private bool m_disposed = false;
+
     /// <summary>
     /// Version of the entity.
     /// </summary>
@@ -28,13 +30,12 @@ public class Entity {
     public string Name { get => m_name; init => m_name = value; }
 
     /// <summary>
-    /// Create a new <see cref="Entity"/> with specific name.
+    /// Create a new <see cref="Entity"/> instance.
     /// </summary>
-    /// <param name="name">Name of the instance.</param>
     public Entity() {
         m_version = 0;
 
-        m_components = new List<Component>();
+        m_components = new List<Component>(capacity: 16);
         m_uniqueComponents = new Dictionary<int, int>();
     }
 
@@ -103,5 +104,5 @@ public class Entity {
     }
 
     public ComponentIterator<Component> GetEnumerator()
-        => new ComponentIterator<Component>(components: m_components);
+        => new ComponentIterator<Component>(components: m_components, count: (uint)m_components.Count);
 }

@@ -94,11 +94,7 @@ public sealed class KinesisEngine: ISystemProvider {
 
         while(!token.IsCancellationRequested) {
             /* Render the frame to the screen/terminal window. */
-            if (m_workSyncState == WorkerSystemState.WAIT_FOR_RENDERER) {
-
-                m_renderer.Render(entities: m_navigator.Current?.Tree ?? []);
-                m_workSyncState.Value = WorkerSystemState.OPEN_FOR_PROCESSING;
-            }
+            m_renderer.Render(entities: m_navigator.Current?.Tree ?? [], sync: m_workSyncState);
 
             if (!firstRun) m_worker.AddRenderMessage(new RenderMessage(m_renderer.FrameTime, (int)m_renderer.FPS, m_renderer.Scale));
             else firstRun = false;
@@ -120,8 +116,7 @@ public sealed class KinesisEngine: ISystemProvider {
     }
 
     private void RegisterBuiltInComponents() {
-        this.RegisterComponent<BoxRenderer>();
-        this.RegisterComponent<TextRenderer>();
+        this.RegisterComponent<RenderComponent>();
 
         this.RegisterComponent<Transform>();
         this.RegisterComponent<ConnectionComponent>();
