@@ -83,11 +83,11 @@ public sealed class KinesisEngine: ISystemProvider {
     /// <summary>
     /// Start the <see cref="KinesisEngine"/> instance with the systems.
     /// </summary>
-    public void Start(CancellationToken token = default) {
+    public async Task Start(CancellationToken token = default) {
         bool firstRun = true;
 
         /* Run the starter systems. */
-        Run(invocation: SystemInvocationTime.ON_BEGIN);
+        await Run(invocation: SystemInvocationTime.ON_BEGIN);
         WorkerSystem.Current.AddSyncState(sync: m_workSyncState);
 
         /* Start main parts of the engine on different threads. (Input, Workers) */
@@ -96,17 +96,17 @@ public sealed class KinesisEngine: ISystemProvider {
 
         while(!token.IsCancellationRequested) {
             /* Render the frame to the screen/terminal window. */
-            m_renderer.Render(entities: m_navigator.Current?.Tree ?? [], sync: m_workSyncState);
+            await m_renderer.Render(entities: m_navigator.Current?.Tree ?? [], sync: m_workSyncState);
 
             if (!firstRun) m_worker.AddRenderMessage(new RenderMessage(m_renderer.FrameTime, (int)m_renderer.FPS, m_renderer.Scale));
             else firstRun = false;
         }
 
         /* Run the shutdown systems. */
-        Run(invocation: SystemInvocationTime.ON_END);
+        await Run(invocation: SystemInvocationTime.ON_END);
     }
 
-    private void Run(SystemInvocationTime invocation) {
+    private Task Run(SystemInvocationTime invocation) {
         ISystem system = null!;
 
         foreach (SystemInvocationInfo systemInfo in m_customSystems.Where(x => x.When == invocation)) {
@@ -115,6 +115,8 @@ public sealed class KinesisEngine: ISystemProvider {
             if (system.Behavior == SystemBehavior.DYNAMIC && systemInfo.System is IDynamicSystem dynamic)
                 dynamic.Run();
         }
+
+        return Task.CompletedTask;
     }
 
     private void RegisterBuiltInComponents() {

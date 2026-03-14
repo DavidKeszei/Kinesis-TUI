@@ -22,12 +22,12 @@ public class InteractionComponent: Component, IStaticType {
     /// </summary>
     /// <param name="onInput">Callback for the inputs.</param>
     public InteractionComponent(Action<InputMessage> onInput, Island island): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME))
-        => WorkerSystem.Current.AddCallback(work: onInput, island);
+        => WorkerSystem.Current.AddCallback(work: onInput, island, tag: WorkTag.INPUT);
 
     /// <summary>
     /// Create a new <see cref="InteractionComponent"/>, which fires every render frame ends.
     /// </summary>
     /// <param name="onRender">Callback for the end of the frame.</param>
     public InteractionComponent(Action<RenderMessage> onRender, Island island): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME))
-        => WorkerSystem.Current.AddCallback(work: onRender, island);
+        => WorkerSystem.Current.AddCallback(work: onRender, island, tag: WorkTag.RENDERING);
 }

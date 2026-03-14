@@ -31,9 +31,9 @@ public readonly record struct RenderMessage: IWorkMessage {
     /// <summary>
     /// Target callback type of the message.
     /// </summary>
-    public static WorkMessageSource Target { get => WorkMessageSource.RENDERING; }
+    public static WorkTag Target { get => WorkTag.RENDERING; }
 
-    internal RenderMessage(float deltaTime, int fps, Vec2 scale) {
+    public RenderMessage(float deltaTime, int fps, Vec2 scale) {
         m_delta = deltaTime;
         m_fps = fps;
 

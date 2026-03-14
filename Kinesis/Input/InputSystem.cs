@@ -43,7 +43,7 @@ public readonly record struct InputMessage: IWorkMessage {
     /// <summary>
     /// Target callback type of the message.
     /// </summary>
-    public static WorkMessageSource Target { get => WorkMessageSource.INPUT; }
+    public static WorkTag Target { get => WorkTag.INPUT; }
 
     /// <summary>Create a new <see cref="InputMessage"/>.</summary>
     /// <param name="key">Actual key value as <see cref="char"/>.</param>

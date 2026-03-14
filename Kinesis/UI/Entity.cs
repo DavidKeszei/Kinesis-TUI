@@ -17,8 +17,6 @@ public class Entity {
     private readonly string m_name = string.Empty;
     private int m_version = 0;
 
-    private bool m_disposed = false;
-
     /// <summary>
     /// Version of the entity.
     /// </summary>

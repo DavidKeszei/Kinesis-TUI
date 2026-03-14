@@ -4,7 +4,13 @@ using System.Text;
 
 namespace Kinesis.Processing;
 
+/// <summary>
+/// Provides target recognition for a message somewhere.
+/// </summary>
 public interface IWorkMessage {
 
-    public abstract static WorkMessageSource Target { get; }
+    /// <summary>
+    /// Target group of the message.
+    /// </summary>
+    public abstract static WorkTag Target { get; }
 }
