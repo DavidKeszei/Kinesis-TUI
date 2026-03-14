@@ -58,7 +58,7 @@ public class Renderer {
     /// Render one frame to the screen.
     /// </summary>
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
-    public void Render(IReadOnlyList<Entity> entities, State<WorkerSystemState> sync) {
+    public Task Render(IReadOnlyList<Entity> entities, State<WorkerSystemState> sync) {
         DateTime start = DateTime.Now;
 
         if (sync == WorkerSystemState.WAIT_FOR_RENDERER) {
@@ -93,6 +93,8 @@ public class Renderer {
             Thread.Sleep(millisecondsTimeout: (int)(MAX_FPS - m_currentFrameTime));
             m_currentFrameTime = MAX_FPS;
         }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

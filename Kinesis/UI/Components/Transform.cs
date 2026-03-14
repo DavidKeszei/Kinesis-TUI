@@ -9,11 +9,11 @@ namespace Kinesis.UI.Components;
 /// </summary>
 public class Transform: Component, IStaticType {
     private const string TYPE_NAME = "Transform";
-    private State<Vec2> m_oldPosition = new ValueState<Vec2>(@default: Vec2.Zero);
-    private State<Vec2> m_oldScale =  new ValueState<Vec2>(@default: Vec2.Zero);
+
+    private readonly State<Vec2> m_oldPosition = new ValueState<Vec2>(@default: Vec2.Zero);
+    private readonly State<Vec2> m_oldScale =  new ValueState<Vec2>(@default: Vec2.Zero);
 
     private Vec2 m_position = Vec2.Zero;
-
     private Vec2 m_scale = Vec2.Zero;
 
     /// <summary>
