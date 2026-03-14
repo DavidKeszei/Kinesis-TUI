@@ -47,7 +47,7 @@ public class Entity {
     public bool AttachComponent<T>(T? component = null!, bool isUnique = false) where T: Component, IStaticType {
         if (component == null) return false;
         if(isUnique || component.TypeOf(type: RenderComponent.Name)) {
-            if(!m_uniqueComponents.TryAdd(ComponentTypeProvider.QueryComponent(name: T.Name), m_components.Count))
+            if(!m_uniqueComponents.TryAdd(ComponentRegistry.QueryComponent(name: T.Name), m_components.Count))
                 return false;
         }
 
@@ -64,7 +64,7 @@ public class Entity {
     /// <param name="index">Indicates, which component we wan't from the type. (Example: if the index = 1, then return second component of the <typeparamref name="T"/>.)</param>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
     public virtual T? GetComponent<T>(int index = 0) where T: Component, IStaticType {
-        if (m_uniqueComponents.TryGetValue(ComponentTypeProvider.QueryComponent(T.Name), out int i))
+        if (m_uniqueComponents.TryGetValue(ComponentRegistry.QueryComponent(T.Name), out int i))
             return (T)m_components[i];
 
         int current = 0;
@@ -82,9 +82,9 @@ public class Entity {
     /// <typeparam name="T">Type of the component.</typeparam>
     /// <param name="index">Indicates where we want delete the component.</param>
     public void RemoveComponent<T>(int index = 0) where T: Component, IStaticType {
-        if (m_uniqueComponents.TryGetValue(key: ComponentTypeProvider.QueryComponent(name: T.Name), out int i)) {
+        if (m_uniqueComponents.TryGetValue(key: ComponentRegistry.QueryComponent(name: T.Name), out int i)) {
             m_components.RemoveAt(i);
-            m_uniqueComponents.Remove(key: ComponentTypeProvider.QueryComponent(name: T.Name));
+            m_uniqueComponents.Remove(key: ComponentRegistry.QueryComponent(name: T.Name));
 
             ++m_version;
             return;

@@ -16,9 +16,17 @@ public interface ISystem {
     public SystemBehavior Behavior { get; }
 }
 
+public interface IDynamicSystem<T>: ISystem where T: allows ref struct {
+    /// <summary>
+    /// Run the current <see cref="IDynamicSystem{T}"/> instance.
+    /// </summary>
+    /// <returns>Return a(n) <typeparamref name="T"/> value.</returns>
+    public T Run();
+}
+
 public interface IDynamicSystem: ISystem {
     /// <summary>
-    /// Start the current <see cref="ISystem"/> instance.
+    /// Run the current <see cref="IDynamicSystem"/> instance.
     /// </summary>
     public void Run();
 }

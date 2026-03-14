@@ -39,17 +39,17 @@ public class Style: Component, IStaticType {
     /// </summary>
     public StyleFlag AsAttribute { get => m_union.GetVT100Attr();  set => m_union.SetVT100Attr(value); }
 
-    private Style(StyleTag tag, RGB color): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) {
+    private Style(StyleTag tag, RGB color): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetRGB(color);
     }
 
-    private Style(StyleTag tag, int value): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) {
+    private Style(StyleTag tag, int value): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetInteger(value);
     }
 
-    private Style(StyleTag tag, StyleFlag flag): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) {
+    private Style(StyleTag tag, StyleFlag flag): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
         m_union.SetVT100Attr(flag);
     }

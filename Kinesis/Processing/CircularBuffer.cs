@@ -80,4 +80,14 @@ internal class CircularBuffer<T> {
         _ = Interlocked.Exchange(ref m_interlock, FALSE);
         return true;
     }
+
+    public CircularBufferSnapshot<T> GetEnumerator() {
+        while(Interlocked.CompareExchange(ref m_interlock, TRUE, TRUE) == TRUE);
+
+        _ = Interlocked.Exchange(ref m_interlock, TRUE);
+        CircularBufferSnapshot<T> snapshot = new CircularBufferSnapshot<T>(buffer: m_buffer.AsSpan()[..m_count]);
+        _ = Interlocked.Exchange(ref m_interlock, FALSE);
+
+        return snapshot;
+    }
 }

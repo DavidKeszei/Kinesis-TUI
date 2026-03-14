@@ -41,5 +41,5 @@ public class Transform: Component, IStaticType {
     /// </summary>
     internal Vec2 OldScale { get => m_oldScale; set => m_oldScale.Value = value; }
 
-    public Transform(): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) { }
+    public Transform(): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) { }
 }

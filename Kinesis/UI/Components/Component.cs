@@ -19,6 +19,6 @@ public abstract class Component {
     /// <returns>Return <see langword="true"/>, if the <paramref name="type"/> is equal with the underlying name. Otherwise return <see langword="false"/>.</returns>
     public bool TypeOf(string type) {
         if (string.IsNullOrEmpty(type)) return false;
-        return m_id == ComponentTypeProvider.QueryComponent(name: type);
+        return m_id == ComponentRegistry.QueryComponent(name: type);
     }
 }

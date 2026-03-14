@@ -32,7 +32,7 @@ public abstract class RenderComponent: Component, IStaticType {
     /// </summary>
     internal bool IsDirty { get => m_isDirty; set => m_isDirty = value; }
 
-    protected RenderComponent(): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) 
+    protected RenderComponent(): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) 
         => m_cache = new Dictionary<StyleTag, Style>(capacity: 8);
 
     /// <summary>

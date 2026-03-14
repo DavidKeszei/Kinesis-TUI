@@ -35,7 +35,7 @@ public class ConnectionComponent: Component, IStaticType {
     /// </summary>
     public ConnectionDir Direction { get => m_direction; init => m_direction = value; }
 
-    public ConnectionComponent(): base(id: ComponentTypeProvider.QueryComponent(TYPE_NAME)) { }
+    public ConnectionComponent(): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) { }
 }
 
 public enum ConnectionDir: byte {

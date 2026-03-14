@@ -8,13 +8,19 @@ namespace Kinesis;
 /// <summary>
 /// Represent a simple registry for <see cref="Component"/> instances.
 /// </summary>
-internal static class ComponentTypeProvider {
+internal static class ComponentRegistry {
     private static readonly Dictionary<string, int> m_registeredComponents = null!;
 
-    static ComponentTypeProvider()
+    static ComponentRegistry()
         => m_registeredComponents = new Dictionary<string, int>();
 
-    internal static bool RegisterComponent<T>(string name) where T : Component 
+    /// <summary>
+    /// Register component type to the <see cref="ComponentRegistry"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of the component.</typeparam>
+    /// <param name="name">Name of the component. (Mostly <see cref="IStaticType.Name"/>)</param>
+    /// <returns></returns>
+    internal static bool RegisterComponent<T>(string name) where T: Component 
         => m_registeredComponents.TryAdd(key: name, value: m_registeredComponents.Count);
 
     internal static int QueryComponent(string name) {

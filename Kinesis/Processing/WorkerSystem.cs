@@ -23,9 +23,10 @@ internal class WorkerSystem: IDynamicSystem {
     private const string ERR_SYNC_NOT_FOUND = "The synchronization context/state wasn't found.";
 
     private const int MAX_MSG_COUNT = 120;
+    private const int MAX_INTERACTION_COUNT = 1024;
 
     private static WorkerSystem m_instance = null!;
-    private readonly ConcurrentQueue<WorkTarget> m_targets = null!;
+    private readonly CircularBuffer<WorkTarget> m_targets = null!;
 
     private readonly CircularBuffer<InputMessage> m_inputMessages = null!;
     private readonly CircularBuffer<RenderMessage> m_renderMessages = null!;
@@ -43,7 +44,7 @@ internal class WorkerSystem: IDynamicSystem {
     public static WorkerSystem Current { get => m_instance ??= new WorkerSystem(); }
 
     public WorkerSystem() {
-        m_targets = new ConcurrentQueue<WorkTarget>();
+        m_targets = new CircularBuffer<WorkTarget>(capacity: MAX_INTERACTION_COUNT);
 
         m_inputMessages = new CircularBuffer<InputMessage>(capacity: MAX_MSG_COUNT);
         m_renderMessages = new CircularBuffer<RenderMessage>(capacity: MAX_MSG_COUNT);
@@ -72,9 +73,8 @@ internal class WorkerSystem: IDynamicSystem {
     /// Add <paramref name="work"/> to the queue.
     /// </summary>
     /// <param name="work">Current work item.</param>
-    /// <param name="context">Holds the changed entities.</param>
-    public void AddCallback<T>(Action<T> work, Island island, WorkTag tag) where T: IWorkMessage
-        => m_targets.Enqueue(new WorkTarget(work, island, tag));
+    public void AddCallback<T>(Action<T> work, Island island) where T: IWorkMessage
+        => m_targets.Write(new WorkTarget(work, island, T.Target));
 
     public void Run() {
         if (m_workSync == null)
@@ -103,7 +103,7 @@ internal class WorkerSystem: IDynamicSystem {
                 continue;
 
             if (target.Tag == T.Target && target.Action is Action<T> action)
-                action(message!);
+                action(message);
         }
     }
 }
