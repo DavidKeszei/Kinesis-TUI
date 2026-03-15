@@ -8,7 +8,7 @@ namespace Kinesis.UI.Components;
 /// <summary>
 /// Represent connection information between two or more <see cref="Entity"/> instances.
 /// </summary>
-public class ConnectionComponent: Component, IStaticType {
+public class Hierarchy: Component, IStaticType {
     private const string TYPE_NAME = "ConnectionComponent";
     private const int PARENT_INDEX = 0;
 
@@ -35,7 +35,7 @@ public class ConnectionComponent: Component, IStaticType {
     /// </summary>
     public ConnectionDir Direction { get => m_direction; init => m_direction = value; }
 
-    public ConnectionComponent(): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) { }
+    public Hierarchy(): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) { }
 }
 
 public enum ConnectionDir: byte {

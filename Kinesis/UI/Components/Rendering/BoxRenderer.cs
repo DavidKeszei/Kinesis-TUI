@@ -44,9 +44,12 @@ public class BoxRenderer: RenderComponent {
         m_cache.Clear();
 
         foreach(Style style in styles) {
-            if(style.Tag == StyleTag.BACKGROUND) {
-                m_cache.Add(style.Tag, style);
-                return;
+            switch (style.Tag) {
+                case StyleTag.BACKGROUND:
+                    m_cache.Add(style.Tag, style);
+                    break;
+                default:
+                    break;
             }
         }
     }

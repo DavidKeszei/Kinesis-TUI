@@ -64,6 +64,8 @@ public class Entity {
     /// <param name="index">Indicates, which component we wan't from the type. (Example: if the index = 1, then return second component of the <typeparamref name="T"/>.)</param>
     /// <returns>Return <typeparamref name="T"/> component. If not exists, then return <see langword="null"/>.</returns>
     public virtual T? GetComponent<T>(int index = 0) where T: Component, IStaticType {
+        if (index < 0) return null!;
+
         if (m_uniqueComponents.TryGetValue(ComponentRegistry.QueryComponent(T.Name), out int i))
             return (T)m_components[i];
 

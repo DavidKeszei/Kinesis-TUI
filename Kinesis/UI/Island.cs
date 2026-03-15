@@ -13,8 +13,9 @@ namespace Kinesis.UI;
 /// </summary>
 public abstract class Island {
     private readonly List<Entity> m_renderSet = null!;
-    private int m_currentEntityIndex = 0;
+    private int m_currentRenderIndex = 0;
 
+    private bool m_isTopOfTheTree = true;
     private bool m_isActive = false;
 
     /// <summary>
@@ -46,33 +47,28 @@ public abstract class Island {
     /// Move through the tree and create list from it.
     /// </summary>
     /// <param name="entity">Current target entity of the call.</param>
-    internal void CreateRenderSet(Entity? entity = null!, bool isTop = true) {
-        if(isTop) entity ??= Build();
+    internal void CreateRenderSet(Entity? entity = null!, int depth = 0) {
+        if (m_isTopOfTheTree) {
+            entity ??= Build();
+            m_isTopOfTheTree = false;
+        }
+
         if(entity == null) return;
+        int childrenCount = entity.CountComponent<Hierarchy>();
 
-        bool isRenderable = entity.GetComponent<RenderComponent>() != null;
-        if (isRenderable) m_renderSet.Add(entity!);
+        if (entity.GetComponent<RenderComponent>() != null) {
+            ++m_currentRenderIndex;
+            m_renderSet.Add(entity!);
 
-        int childrenCount = CountOfChild(entity);
+            entity.GetComponent<RenderHierarchy>()!.Depth = depth;
+            entity.GetComponent<RenderHierarchy>()!.NextRenderElementIndex = m_currentRenderIndex;
+        }
 
         for (int i = 1; i < childrenCount; ++i) {
-            ConnectionComponent child = entity!.GetComponent<ConnectionComponent>(i)!;
+            Hierarchy child = entity!.GetComponent<Hierarchy>(i)!;
 
-            if(child.Attached != null) 
-                CreateRenderSet(entity: child.Attached, isTop: false);
+            if (child.Attached != null)
+                CreateRenderSet(entity: child.Attached, child.Attached.GetComponent<RenderComponent>() == null ? depth + 1 : depth);
         }
-    }
-
-    private int CountOfChild(Entity? entity) {
-        if (entity == null)
-            return 0;
-
-        int count = 0;
-        foreach (Component component in entity) {
-            if (component.TypeOf(ConnectionComponent.Name))
-                ++count;
-        }
-
-        return count;
     }
 }

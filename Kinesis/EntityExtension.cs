@@ -1,4 +1,5 @@
-﻿using Kinesis.UI;
+﻿using Kinesis.Rendering;
+using Kinesis.UI;
 using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,33 @@ public static class EntityExtension {
                 MoveAnchor.ABSOLUTE => new Vec2(x, y),
                 _ => transform.Position
             };
+        }
+
+        public int CountComponent<T>(Func<T, bool>? comparand = null) where T: Component, IStaticType {
+            int count = 0;
+            comparand ??= static(_) => true;
+
+            foreach (Component comp in entity)
+                if (comp.TypeOf(T.Name) && comparand((T)comp))
+                    ++count;
+
+            return count;
+        }
+
+        public int LastChildrenPosition(Func<Entity, bool>? where = null) {
+            int childCount = CountComponent<Hierarchy>(entity);
+            if (where == null) return childCount;
+
+            int pos = -1;
+            for (int i = 1; i < childCount; ++i) {
+                Entity? child = entity.GetComponent<Hierarchy>(i)!.Attached;
+
+                if (child != null && where(child)) {
+                    pos = i;
+                }
+            }
+
+            return pos;
         }
     }
 }

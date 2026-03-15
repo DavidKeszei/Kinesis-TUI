@@ -1,4 +1,5 @@
-﻿using Kinesis.UI.Components;
+﻿using Kinesis.Rendering;
+using Kinesis.UI.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,17 +14,27 @@ public class ListOf: Entity {
                 return;
 
             for (int i = 0; i < value.Count; ++i) {
-                ConnectionComponent conn = new ConnectionComponent() {
+                Hierarchy conn = new Hierarchy() {
                     Direction = ConnectionDir.DOWN,
                     Attached = value[i]
                 };
 
-                value[i].GetComponent<ConnectionComponent>()!.Attached = this;
-                _ = base.AttachComponent<ConnectionComponent>(conn);
+                value[i].GetComponent<Hierarchy>(Hierarchy.Parent)!.Attached = this;
+                _ = base.AttachComponent<Hierarchy>(conn);
             }
         }
     }
 
     public ListOf()
-        => _ = base.AttachComponent<ConnectionComponent>(new ConnectionComponent() { Direction = ConnectionDir.UP });
+        => _ = base.AttachComponent<Hierarchy>(new Hierarchy() { Direction = ConnectionDir.UP });
+
+    private int LastRenderableIndex(List<Entity> list) {
+        int pos = -1;
+        for (int i = 0; i < list.Count; ++i) {
+            if (list[i].GetComponent<RenderComponent>() != null)
+                pos = i;
+        }
+
+        return pos;
+    }
 }

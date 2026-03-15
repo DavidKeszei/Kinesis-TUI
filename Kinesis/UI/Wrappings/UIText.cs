@@ -50,6 +50,8 @@ public class UIText: Entity {
         base.AttachComponent<Style>(component: Style.CreateFromRGB(tag: StyleTag.FOREGROUND, color: RGB.White));
 
         base.AttachComponent<Style>(component: Style.CreateFromAttributes(tag: StyleTag.FONT_ATTR, flag: StyleFlag.NONE));
-        base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.UP }, isUnique: true);
+        base.AttachComponent<Hierarchy>(component: new Hierarchy() { Direction = ConnectionDir.UP }, isUnique: true);
+
+        base.AttachComponent<RenderHierarchy>(component: new RenderHierarchy(), isUnique: true);
     }
 }

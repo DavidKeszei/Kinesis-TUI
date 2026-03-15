@@ -11,14 +11,16 @@ namespace Kinesis.Rendering;
 /// <summary>
 /// Represent the rendering engine of the library.
 /// </summary>
-public class Renderer {
+public sealed class Renderer {
     private const int MAX_STACK_BUFFER_LEN = 16_384;
     private const float MAX_FPS = 8.3f;
+
+    private readonly State<WorkerSystemState> m_sync = null!;
+    private readonly StreamWriter m_output = null!;
 
     private ConsoleBuffer m_frontBuffer = default!;
     private ConsoleBuffer m_backBuffer = default!;
 
-    private StreamWriter m_output = null!;
     private Vec2 m_scale = Vec2.Zero;
 
     private float m_currentFrameTime = .0f;
@@ -43,14 +45,16 @@ public class Renderer {
     /// Create a new <see cref="Renderer"/> instance with specific <paramref name="scale"/>.
     /// </summary>
     /// <param name="scale">Scale of the console screen.</param>
-    public Renderer(Vec2 scale) {
+    public Renderer(Vec2 scale, State<WorkerSystemState> sync) {
         m_frontBuffer = new ConsoleBuffer((int)scale.X, (int)scale.Y);
         m_backBuffer = new ConsoleBuffer((int)scale.X, (int)scale.Y);
 
         m_scale = scale;
-        m_output = new StreamWriter(stream: Console.OpenStandardOutput());
+        m_sync = sync;
 
+        m_output = new StreamWriter(stream: Console.OpenStandardOutput());
         m_output.AutoFlush = false;
+
         Console.CursorVisible = false;
     }
 
@@ -58,16 +62,15 @@ public class Renderer {
     /// Render one frame to the screen.
     /// </summary>
     /// <param name="entities">Renderable entities of the <see cref="Renderer"/>.</param>
-    public Task Render(IReadOnlyList<Entity> entities, State<WorkerSystemState> sync) {
+    public Task Render(IReadOnlyList<Entity> entities) {
         DateTime start = DateTime.Now;
 
-        if (sync == WorkerSystemState.WAIT_FOR_RENDERER) {
+        if (m_sync == WorkerSystemState.WAIT_FOR_RENDERER) {
             for (int i = 0; i < entities.Count; ++i) {
                 Transform? transform = entities[i].GetComponent<Transform>();
                 RenderComponent? renderLogic = entities[i].GetComponent<RenderComponent>();
 
-                /* The parent always connected with the first ConnectionComponent instance */
-                ConnectionComponent? child = entities[i].GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
+                Hierarchy? child = entities[i].GetComponent<Hierarchy>(index: Hierarchy.Parent);
 
                 if (renderLogic != null && transform != null && renderLogic.IsDirty) {
                     Clear(canvas: ConsoleBuffer.Slice(ref m_backBuffer, transform.OldPosition, transform.OldScale), child == null ? null! : child.Attached);
@@ -80,11 +83,13 @@ public class Renderer {
 
                     transform.OldScale = transform.Scale; /* <- Enforce update, when scale the same pervious frame, but content is changed */
                     transform.OldPosition = transform.Position;
+
+                    DropDirtiness(entities[i], entities);
                 }
             }
 
             Diffing();
-            sync.Value = WorkerSystemState.OPEN_FOR_PROCESSING;
+            m_sync.Value = WorkerSystemState.OPEN_FOR_PROCESSING;
         }
 
         m_currentFrameTime = (float)(DateTime.Now - start).TotalMilliseconds;
@@ -168,21 +173,29 @@ public class Renderer {
     }
 
     private Entity? GetUpwardConnection(Entity entity) {
-        ConnectionComponent? connection = entity.GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent);
+        Hierarchy? connection = entity.GetComponent<Hierarchy>(index: Hierarchy.Parent);
 
         if (connection == null || connection.Direction != ConnectionDir.UP) return null;
         return connection?.Attached;
     }
 
     /// <summary>
-    /// Indicates if clearing is required on the screen.
+    /// Drop the dirtiness every <see cref="Entity"/> by one.
     /// </summary>
-    /// <param name="previous">Previous <see cref="Transform"/> in the Z-index list.</param>
-    /// <param name="current">Current <see cref="Transform"/> of the render object.</param>
-    /// <returns>Return <see langword="true"/>, if the two <see cref="Transform"/> is equal in old-state term. Otherwise return <see langword="false"/>.</returns>
-    /// <remarks><b>Remark:</b> This eliminate the not required clear, because in the Z-index list someone always clearing if this necessary.</remarks>
-    private bool IsClearRequired(Transform previous, Transform current) {
-        if (previous == null) return true;
-        return previous.OldScale != current.OldScale && previous.OldPosition != current.OldPosition;
+    /// <param name="current">Pivot of the drop.</param>
+    /// <param name="entities">All drawable entities.</param>
+    private void DropDirtiness(Entity current, IReadOnlyList<Entity> entities) {
+        if (current == null) return;
+
+        RenderHierarchy renderHierarchy = current.GetComponent<RenderHierarchy>()!;
+        int currentDepth = renderHierarchy.Depth;
+
+        while (renderHierarchy.Depth - currentDepth <= 1 && entities.Count > renderHierarchy.NextRenderElementIndex) {
+            RenderComponent render = entities[renderHierarchy.NextRenderElementIndex].GetComponent<RenderComponent>()!;
+            render.IsDirty = true;
+
+            current = entities[renderHierarchy.NextRenderElementIndex];
+            renderHierarchy = current.GetComponent<RenderHierarchy>()!;
+        }
     }
 }
