@@ -32,7 +32,7 @@ public abstract class Island {
     /// Implicit conversion between <see cref="Island"/> and <see cref="Entity"/>.
     /// </summary>
     /// <param name="island">Current <see cref="Island"/> instance.</param>
-    public static implicit operator Entity?(Island island) => island.Build();
+    public static implicit operator Entity(Island island) => island.Build() ?? null!;
 
     public Island()
         => m_renderSet = new List<Entity>(capacity: 32);

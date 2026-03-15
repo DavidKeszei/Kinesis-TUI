@@ -27,6 +27,14 @@ public static class EntityExtension {
             };
         }
 
+        public Style? QueryStyle(StyleTag tag) {
+            foreach (Style component in new StyleEnumerator(entity)) {
+                if (component.Tag == tag) return component;
+            }
+
+            return null!;
+        }
+
         public int CountComponent<T>(Func<T, bool>? comparand = null) where T: Component, IStaticType {
             int count = 0;
             comparand ??= static(_) => true;
@@ -36,22 +44,6 @@ public static class EntityExtension {
                     ++count;
 
             return count;
-        }
-
-        public int LastChildrenPosition(Func<Entity, bool>? where = null) {
-            int childCount = CountComponent<Hierarchy>(entity);
-            if (where == null) return childCount;
-
-            int pos = -1;
-            for (int i = 1; i < childCount; ++i) {
-                Entity? child = entity.GetComponent<Hierarchy>(i)!.Attached;
-
-                if (child != null && where(child)) {
-                    pos = i;
-                }
-            }
-
-            return pos;
         }
     }
 }

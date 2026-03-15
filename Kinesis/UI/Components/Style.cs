@@ -27,31 +27,36 @@ public class Style: Component, IStaticType {
     /// <summary>
     /// Interact the underlying value as <see cref="int"/>.
     /// </summary>
-    public int AsInt { get => m_union.GetInteger(); set => m_union.SetInteger(value); }
+    public int AsInt { get => m_union.INumber; set => m_union.INumber = value; }
 
     /// <summary>
     /// Interact the underlying value as <see cref="RGB"/>.
     /// </summary>
-    public RGB AsRGB { get => m_union.GetRGB(); set => m_union.SetRGB(value); }
+    public RGB AsRGB { get => m_union.Color; set => m_union.Color = value; }
 
     /// <summary>
     /// Interact the underlying value as <see cref="StyleFlag"/>.
     /// </summary>
-    public StyleFlag AsAttribute { get => m_union.GetVT100Attr();  set => m_union.SetVT100Attr(value); }
+    public StyleFlag AsAttribute { get => m_union.Flag;  set => m_union.Flag = value; }
 
     private Style(StyleTag tag, RGB color): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
-        m_union.SetRGB(color);
+        m_union.Color = color;
     }
 
     private Style(StyleTag tag, int value): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
-        m_union.SetInteger(value);
+        m_union.INumber = value;
     }
 
     private Style(StyleTag tag, StyleFlag flag): base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
         m_union = new StyleGenericUnion(tag);
-        m_union.SetVT100Attr(flag);
+        m_union.Flag = flag;
+    }
+
+    private Style(StyleTag tag, char chr) : base(id: ComponentRegistry.QueryComponent(TYPE_NAME)) {
+        m_union = new StyleGenericUnion(tag);
+        m_union.Character = chr;
     }
 
     /// <summary>
@@ -74,9 +79,17 @@ public class Style: Component, IStaticType {
     /// Create a new <see cref="Style"/> with <see cref="StyleFlag"/> value.
     /// </summary>
     /// <param name="tag">Tag of the style.</param>
-    /// <param name="flag">The color value itself.</param>
+    /// <param name="flag">The flag value of the VT100 character.</param>
     /// <returns>Return a <see cref="Style"/> instance.</returns>
     public static Style CreateFromAttributes(StyleTag tag, StyleFlag flag) => new Style(tag, flag);
+
+    /// <summary>
+    /// Create a new <see cref="Style"/> with <see cref="char"/> value.
+    /// </summary>
+    /// <param name="tag">Tag of the style.</param>
+    /// <param name="chr">Character value of the <see cref="Style"/> instance.</param>
+    /// <returns>Return a <see cref="Style"/> instance.</returns>
+    public static Style CreateFromChar(StyleTag tag, char chr) => new Style(tag, chr);
 }
 
 /// <summary>
@@ -90,6 +103,7 @@ internal struct StyleGenericUnion {
     [FieldOffset(0)] private StyleFlag m_flag = StyleFlag.NONE;
     [FieldOffset(0)] private RGB m_color = RGB.Black;
 
+    [FieldOffset(0)] private char m_char = '\0';
     [FieldOffset(8)] private readonly StyleTag m_tag = StyleTag.BACKGROUND;
 
     /// <summary>
@@ -103,46 +117,15 @@ internal struct StyleGenericUnion {
     /// <param name="tag">Tag of the <see cref="StyleGenericUnion"/> instance.</param>
     public StyleGenericUnion(StyleTag tag) => m_tag = tag;
 
-    public void SetInteger(int value) {
-        if (m_tag == StyleTag.BORDER_WIDTH)
-            m_integer = value;
-    }
+    public char Character { readonly get => m_char; set => m_char = value; }
 
-    public void SetVT100Attr(StyleFlag value) {
-        if (m_tag == StyleTag.FONT_ATTR)
-            m_flag = value;
-    }
+    public int INumber { readonly get => m_integer; set => m_integer = value; }
 
-    public void SetRGB(RGB value) {
-        switch (m_tag) {
-            case StyleTag.FOREGROUND:
-            case StyleTag.BACKGROUND:
-            case StyleTag.BORDER_COLOR:
-                m_color = value;
-                break;
-        }
-    }
+    public float FNumber { readonly get => m_floating; set => m_floating = value; }
 
-    public int GetInteger() {
-        if (m_tag == StyleTag.BORDER_WIDTH)
-            return m_integer;
+    public RGB Color { readonly get => m_color; set => m_color = value; }
 
-        return -1;
-    }
-
-    public StyleFlag GetVT100Attr() {
-        return m_tag switch {
-            StyleTag.FONT_ATTR => m_flag,
-            _ => StyleFlag.NONE
-        };
-    }
-
-    public RGB GetRGB() {
-        return m_tag switch {
-            StyleTag.FOREGROUND or StyleTag.BACKGROUND or StyleTag.BORDER_COLOR => m_color,
-            _ => RGB.Black,
-        };
-    }
+    public StyleFlag Flag { readonly get => m_flag; set => m_flag = value; }
 }
 
 public enum StyleTag: byte {
@@ -150,6 +133,7 @@ public enum StyleTag: byte {
     FOREGROUND,
     BORDER_WIDTH,
     BORDER_COLOR,
+    BORDER_CHAR,
     MARGIN,
     PADDING,
     FONT_ATTR

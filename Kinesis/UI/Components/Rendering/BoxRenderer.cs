@@ -21,7 +21,6 @@ public class BoxRenderer: RenderComponent {
         }
 
         for (int x = 0; x < buffer.Scale.X; ++x) {
-
             for (int y = 0; y < buffer.Scale.Y; ++y) {
                 ref vtchar_t ch = ref buffer[x, y];
 
@@ -46,6 +45,12 @@ public class BoxRenderer: RenderComponent {
         foreach(Style style in styles) {
             switch (style.Tag) {
                 case StyleTag.BACKGROUND:
+                    m_cache.Add(style.Tag, style);
+                    break;
+                case StyleTag.BORDER_CHAR:
+                    m_cache.Add(style.Tag, style);
+                    break;
+                case StyleTag.BORDER_COLOR:
                     m_cache.Add(style.Tag, style);
                     break;
                 default:

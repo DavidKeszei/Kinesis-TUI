@@ -158,11 +158,8 @@ public sealed class Renderer {
         RGB rgb = RGB.Transparent;
         if (entity == null) return rgb;
 
-        using StyleEnumerator styles = new StyleEnumerator(entity);
-        foreach (Style style in styles) {
-            if (style.Tag == StyleTag.BACKGROUND)
-                return ((Style)style).AsRGB;
-        }
+        Style? bg = entity.QueryStyle(tag: StyleTag.BACKGROUND);
+        if (bg != null) return bg.AsRGB;
 
         Entity? parent = GetUpwardConnection(entity);
 
