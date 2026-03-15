@@ -29,14 +29,14 @@ public sealed class KinesisEngine: ISystemProvider {
     public KinesisEngine(string? title = null!, int x = -1, int y = -1) {
         Console.Out.Write(title == null ? $"\e]0;KinesisTUI\a" : $"\e]0;{title}\a");
 
-        m_renderer = new Renderer(scale: new Vec2(x == -1 ? Console.BufferWidth : x, y == -1 ? Console.BufferHeight : y));
+        m_workSyncState = new ValueState<WorkerSystemState>(@default: WorkerSystemState.WAIT_FOR_RENDERER);
         m_input = new InputSystem();
 
         m_worker = WorkerSystem.Current;
         m_navigator = new NavigationSystem(provider: this);
 
+        m_renderer = new Renderer(scale: new Vec2(x == -1 ? Console.BufferWidth : x, y == -1 ? Console.BufferHeight : y), sync: m_workSyncState);
         m_customSystems = new List<SystemInvocationInfo>();
-        m_workSyncState = new ValueState<WorkerSystemState>(@default: WorkerSystemState.WAIT_FOR_RENDERER);
 
         Console.InputEncoding = Encoding.UTF8;
         Console.OutputEncoding = Encoding.UTF8;
@@ -96,7 +96,7 @@ public sealed class KinesisEngine: ISystemProvider {
 
         while(!token.IsCancellationRequested) {
             /* Render the frame to the screen/terminal window. */
-            await m_renderer.Render(entities: m_navigator.Current?.Tree ?? [], sync: m_workSyncState);
+            await m_renderer.Render(entities: m_navigator.Current?.Tree ?? []);
 
             if (!firstRun) m_worker.AddRenderMessage(new RenderMessage(m_renderer.FrameTime, (int)m_renderer.FPS, m_renderer.Scale));
             else firstRun = false;
@@ -123,9 +123,11 @@ public sealed class KinesisEngine: ISystemProvider {
         this.RegisterComponent<RenderComponent>();
 
         this.RegisterComponent<Transform>();
-        this.RegisterComponent<ConnectionComponent>();
+        this.RegisterComponent<Hierarchy>();
 
         this.RegisterComponent<Style>();
         this.RegisterComponent<InteractionComponent>();
+
+        this.RegisterComponent<RenderHierarchy>();
     }
 }

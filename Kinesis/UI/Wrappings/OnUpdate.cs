@@ -34,25 +34,23 @@ public class OnUpdate<T>: Entity where T: IWorkMessage {
     }
 
     /// <summary>
-    /// Attached child of the <see cref="OnUpdate"/>.
+    /// Attached child of the <see cref="OnUpdate{T}"/>.
     /// </summary>
     public Entity Child {
         set {
-            ConnectionComponent connection = base.GetComponent<ConnectionComponent>(index: 1)!;
-            connection?.Attached = value;
+            Hierarchy connection = base.GetComponent<Hierarchy>(index: 1)!;
+            connection!.Attached = value;
 
-            value.GetComponent<ConnectionComponent>(index: ConnectionComponent.Parent)?.Attached = this;
+            value.GetComponent<Hierarchy>(index: Hierarchy.Parent)!.Attached = this;
         }
     }
 
     public OnUpdate(Island island) {
-        base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.UP });
-        base.AttachComponent<ConnectionComponent>(component: new ConnectionComponent() { Direction = ConnectionDir.DOWN });
+        base.AttachComponent<Hierarchy>(component: new Hierarchy() { Direction = ConnectionDir.UP });
+        base.AttachComponent<Hierarchy>(component: new Hierarchy() { Direction = ConnectionDir.DOWN });
 
         this.m_island = island;
     }
 
-    private void SetCallback(Action<T, PageEntityVisitor> func, T message) {
-        func(message, new PageEntityVisitor(this));
-    }
+    private void SetCallback(Action<T, PageEntityVisitor> func, T message) => func(message, new PageEntityVisitor(this));
 }

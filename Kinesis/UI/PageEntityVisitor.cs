@@ -40,7 +40,7 @@ public readonly ref struct PageEntityVisitor {
 
         int childrenCount = CountOfChild(current);
         for (int i = 1; i < childrenCount; ++i) {
-            Entity? child = current.GetComponent<ConnectionComponent>(index: i)?.Attached;
+            Entity? child = current.GetComponent<Hierarchy>(index: i)?.Attached;
 
             if (child != null) {
                 if (!string.IsNullOrEmpty(child.Name) && IsSequenceEqual(child.Name, name)) return child;
@@ -71,7 +71,7 @@ public readonly ref struct PageEntityVisitor {
         int count = 0;
 
         foreach(Component component in entity) {
-            if (component.TypeOf(type: ConnectionComponent.Name))
+            if (component.TypeOf(type: Hierarchy.Name))
                 ++count;
         }
 

@@ -150,5 +150,7 @@ public enum StyleTag: byte {
     FOREGROUND,
     BORDER_WIDTH,
     BORDER_COLOR,
+    MARGIN,
+    PADDING,
     FONT_ATTR
 }
